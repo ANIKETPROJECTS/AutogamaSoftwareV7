@@ -102,9 +102,39 @@ export default function Invoices() {
     });
   };
 
+  const { data: dbServices = [] } = useQuery<any[]>({
+    queryKey: ["/api/services"],
+  });
+
+  const { data: inventory = [] } = useQuery<any[]>({
+    queryKey: ["inventory"],
+    queryFn: api.inventory.list,
+  });
+
+  const ppfInventory = useMemo(() => inventory.filter(i => i.isPpf), [inventory]);
+  const accessoryInventory = useMemo(() => inventory.filter(i => !i.isPpf && i.category !== 'PPF'), [inventory]);
+
   const updateManualItem = (index: number, field: string, value: any) => {
     const newItems = [...manualInvoiceData.items];
-    newItems[index] = { ...newItems[index], [field]: value };
+    const item = { ...newItems[index], [field]: value };
+    
+    // If selecting a predefined service or accessory
+    if (field === 'description' && value) {
+      const selectedService = dbServices.find((s: any) => s.name === value);
+      if (selectedService) {
+        // Try to match price by vehicle type if possible, or use first price
+        const prices = selectedService.prices instanceof Map ? Object.fromEntries(selectedService.prices) : selectedService.prices;
+        const price = prices?.[manualInvoiceData.vehicleType] || Object.values(prices || {})[0] || 0;
+        item.unitPrice = price;
+      } else {
+        const selectedInventory = inventory.find((i: any) => i.name === value);
+        if (selectedInventory) {
+          item.unitPrice = selectedInventory.price || 0;
+        }
+      }
+    }
+    
+    newItems[index] = item;
     setManualInvoiceData({ ...manualInvoiceData, items: newItems });
   };
 
@@ -577,12 +607,36 @@ export default function Invoices() {
             {manualInvoiceData.items.map((item: any, index: number) => (
               <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end border p-2 rounded">
                 <div className="md:col-span-2 space-y-1">
-                  <Label className="text-xs">Description</Label>
-                  <Input 
-                    value={item.description}
-                    onChange={(e) => updateManualItem(index, "description", e.target.value)}
-                    placeholder="Service description"
-                  />
+                  <Label className="text-xs">Description / Selection</Label>
+                  <div className="flex gap-2">
+                    <Select 
+                      value={item.description} 
+                      onValueChange={(val) => updateManualItem(index, "description", val)}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select service or item" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="custom">Custom Entry...</SelectItem>
+                        <Separator />
+                        <div className="px-2 py-1 text-xs font-bold text-muted-foreground bg-muted/50">Services</div>
+                        {dbServices.map((s: any) => (
+                          <SelectItem key={s._id} value={s.name}>{s.name}</SelectItem>
+                        ))}
+                        <Separator />
+                        <div className="px-2 py-1 text-xs font-bold text-muted-foreground bg-muted/50">Inventory / PPF</div>
+                        {inventory.map((i: any) => (
+                          <SelectItem key={i._id} value={i.name}>{i.name} ({i.quantity} {i.unit})</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {item.description === 'custom' && (
+                      <Input 
+                        placeholder="Type custom description" 
+                        onChange={(e) => updateManualItem(index, "description", e.target.value)}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Price</Label>

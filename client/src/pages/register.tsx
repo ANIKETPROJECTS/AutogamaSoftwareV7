@@ -658,6 +658,12 @@ export default function CustomerRegistration() {
   }, [dbServices]);
 
   const handleSubmit = () => {
+    if (isInvoiceDirect) {
+      // Skip backend registration, just redirect to invoices with query params
+      setLocation(`/invoices?direct=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}`);
+      return;
+    }
+
     const selectedService = customerData.ppfCategory
       ? `${customerData.ppfCategory} - ${customerData.ppfWarranty}`
       : "";
