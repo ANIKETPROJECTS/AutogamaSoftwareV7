@@ -599,6 +599,35 @@ export default function CustomerRegistration() {
 
   const [isInvoiceDirect, setIsInvoiceDirect] = useState(false);
 
+  const [selectedAccessories, setSelectedAccessories] = useState<Array<{
+    name: string;
+    quantity: number;
+    price: number;
+  }>>([]);
+
+  const addAccessory = () => {
+    if (!customerData.tempAccessoryName) return;
+    const accessory = accessoryInventory.find(i => i.name === customerData.tempAccessoryName);
+    if (!accessory) return;
+
+    setSelectedAccessories([...selectedAccessories, {
+      name: accessory.name,
+      quantity: customerData.accessoryQuantity,
+      price: accessory.price || 0
+    }]);
+
+    setCustomerData({
+      ...customerData,
+      tempAccessoryCategory: "",
+      tempAccessoryName: "",
+      accessoryQuantity: 1
+    });
+  };
+
+  const removeAccessory = (index: number) => {
+    setSelectedAccessories(selectedAccessories.filter((_, i) => i !== index));
+  };
+
   const createCustomerMutation = useMutation({
     mutationFn: api.customers.create,
     onSuccess: async (customer) => {
@@ -684,17 +713,16 @@ export default function CustomerRegistration() {
         });
       });
 
-      // Add accessories properly
-      const accessory = accessoryInventory.find(i => i.name === customerData.tempAccessoryName);
-      if (accessory && customerData.accessoryQuantity > 0) {
+      // Add selected accessories
+      selectedAccessories.forEach(acc => {
         items.push({
-          description: `${accessory.name} (x${customerData.accessoryQuantity})`,
-          quantity: customerData.accessoryQuantity,
-          unitPrice: accessory.price || 0,
+          description: `${acc.name} (x${acc.quantity})`,
+          quantity: acc.quantity,
+          unitPrice: acc.price,
           type: "accessory",
           category: "Accessory"
         });
-      }
+      });
 
       // Pass via URL parameters
       const itemsParam = encodeURIComponent(JSON.stringify(items));
@@ -762,11 +790,7 @@ export default function CustomerRegistration() {
             ppfPrice: customerData.ppfPrice,
             laborCost: 0,
             otherServices: customerData.selectedOtherServices,
-            accessories: customerData.tempAccessoryName && customerData.accessoryQuantity > 0 ? [{
-              name: customerData.tempAccessoryName,
-              quantity: customerData.accessoryQuantity,
-              price: accessoryInventory.find(i => i.name === customerData.tempAccessoryName)?.price || 0
-            }] : [],
+            accessories: selectedAccessories,
           },
         ],
       },
