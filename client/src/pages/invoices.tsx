@@ -135,6 +135,7 @@ export default function Invoices() {
       if (value === 'custom') {
         item.description = '';
         item.unitPrice = 0;
+        item.category = undefined;
       } else {
         const selectedService = dbServices.find((s: any) => s.name === value);
         if (selectedService) {
@@ -142,10 +143,12 @@ export default function Invoices() {
           const prices = selectedService.prices instanceof Map ? Object.fromEntries(selectedService.prices) : selectedService.prices;
           const price = prices?.[manualInvoiceData.vehicleType] || Object.values(prices || {})[0] || 0;
           item.unitPrice = price;
+          item.category = "Service";
         } else {
           const selectedInventory = inventory.find((i: any) => i.name === value);
           if (selectedInventory) {
             item.unitPrice = selectedInventory.price || 0;
+            item.category = selectedInventory.isPpf ? "PPF" : "Accessory";
           }
         }
       }
@@ -622,9 +625,16 @@ export default function Invoices() {
               <Button type="button" variant="outline" size="sm" onClick={addManualItem}>Add Item</Button>
             </div>
             {manualInvoiceData.items.map((item: any, index: number) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end border p-2 rounded">
+              <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end border p-2 rounded relative">
                 <div className="md:col-span-2 space-y-1">
-                  <Label className="text-xs">Description / Selection</Label>
+                  <div className="flex justify-between items-center">
+                    <Label className="text-xs">Description / Selection</Label>
+                    {item.category && (
+                      <Badge variant="outline" className="text-[10px] h-4 py-0">
+                        {item.category}
+                      </Badge>
+                    )}
+                  </div>
                   <div className="flex gap-2">
                     <Select 
                       value={item.description} 
@@ -652,9 +662,10 @@ export default function Invoices() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {item.description === 'custom' && (
+                    {(item.description === 'custom' || (item.description && !dbServices.find((s:any) => s.name === item.description) && !inventory.find((i:any) => i.name === item.description))) && (
                       <Input 
                         placeholder="Type custom description" 
+                        value={item.description === 'custom' ? '' : item.description}
                         onChange={(e) => updateManualItem(index, "description", e.target.value)}
                       />
                     )}

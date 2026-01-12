@@ -668,7 +668,8 @@ export default function CustomerRegistration() {
           description: `${customerData.ppfCategory} - ${customerData.ppfWarranty}`,
           quantity: 1,
           unitPrice: customerData.ppfPrice,
-          type: "service"
+          type: "service",
+          category: "PPF"
         });
       }
       
@@ -678,9 +679,24 @@ export default function CustomerRegistration() {
           description: s.name,
           quantity: 1,
           unitPrice: s.price,
-          type: "service"
+          type: "service",
+          category: "Service"
         });
       });
+
+      // Add accessories
+      if (customerData.tempAccessoryName && customerData.accessoryQuantity > 0) {
+        const accessory = accessoryInventory.find(i => i.name === customerData.tempAccessoryName);
+        if (accessory) {
+           items.push({
+             description: accessory.name,
+             quantity: customerData.accessoryQuantity,
+             unitPrice: accessory.price || 0,
+             type: "accessory",
+             category: "Accessory"
+           });
+        }
+      }
       
       // Pass via URL parameters
       const itemsParam = encodeURIComponent(JSON.stringify(items));
