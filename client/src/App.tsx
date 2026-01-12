@@ -44,7 +44,6 @@ function ProtectedRoutes() {
           <Route path="/invoices" component={Invoices} />
           <Route path="/inventory" component={Inventory} />
           <Route path="/roll-history/:id" component={RollHistory} />
-          <Route path="/accessories" component={Accessories} />
           <Route path="/appointments" component={Appointments} />
           <Route path="/price-inquiries" component={PriceInquiries} />
           <Route path="/settings" component={Settings} />

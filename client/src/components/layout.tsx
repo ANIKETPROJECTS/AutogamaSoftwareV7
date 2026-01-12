@@ -35,7 +35,6 @@ const menuItems = [
   { href: '/invoices', label: 'Invoices & Tracking', icon: FileText },
   { href: '/technicians', label: 'Technicians', icon: UserCog },
   { href: '/inventory', label: 'Inventory', icon: Package },
-  { href: '/accessories', label: 'Accessories', icon: CreditCard },
   { href: '/appointments', label: 'Appointments', icon: Calendar },
   { href: '/manage-services', label: 'Manage Services', icon: ShieldCheck },
   { href: '/settings', label: 'Settings', icon: Settings },
