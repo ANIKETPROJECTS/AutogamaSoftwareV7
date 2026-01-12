@@ -716,8 +716,7 @@ export default function CustomerRegistration() {
       // Add selected accessories
       selectedAccessories.forEach(acc => {
         items.push({
-          description: acc.name, // Use original name instead of name (xQ) to help matching
-          displayDescription: `${acc.name} (x${acc.quantity})`,
+          description: `${acc.name} (x${acc.quantity})`,
           quantity: acc.quantity,
           unitPrice: acc.price,
           type: "accessory",

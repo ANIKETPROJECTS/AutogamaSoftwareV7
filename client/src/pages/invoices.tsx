@@ -68,11 +68,7 @@ export default function Invoices() {
       
       if (itemsFromUrl) {
         try {
-          const parsed = JSON.parse(decodeURIComponent(itemsFromUrl));
-          initialItems = parsed.map((item: any) => ({
-            ...item,
-            description: item.displayDescription || item.description // Favor displayDescription if available
-          }));
+          initialItems = JSON.parse(decodeURIComponent(itemsFromUrl));
         } catch (e) {
           console.error("Failed to parse items from URL", e);
         }
@@ -668,7 +664,7 @@ export default function Invoices() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {(item.description === 'custom' || (item.description && !dbServices.find((s:any) => s.name === item.description) && !inventory.find((i:any) => i.name === item.description) && !item.category)) && (
+                    {(item.description === 'custom' || (item.description && !dbServices.find((s:any) => s.name === item.description) && !inventory.find((i:any) => i.name === item.description))) && (
                       <Input 
                         placeholder="Type custom description" 
                         value={item.description === 'custom' ? '' : item.description}
