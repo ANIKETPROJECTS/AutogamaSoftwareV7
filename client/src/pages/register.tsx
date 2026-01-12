@@ -684,20 +684,18 @@ export default function CustomerRegistration() {
         });
       });
 
-      // Add accessories
-      if (customerData.tempAccessoryName && customerData.accessoryQuantity > 0) {
-        const accessory = accessoryInventory.find(i => i.name === customerData.tempAccessoryName);
-        if (accessory) {
-           items.push({
-             description: accessory.name,
-             quantity: customerData.accessoryQuantity,
-             unitPrice: accessory.price || 0,
-             type: "accessory",
-             category: "Accessory"
-           });
-        }
+      // Add accessories properly
+      const accessory = accessoryInventory.find(i => i.name === customerData.tempAccessoryName);
+      if (accessory && customerData.accessoryQuantity > 0) {
+        items.push({
+          description: `${accessory.name} (x${customerData.accessoryQuantity})`,
+          quantity: customerData.accessoryQuantity,
+          unitPrice: accessory.price || 0,
+          type: "accessory",
+          category: "Accessory"
+        });
       }
-      
+
       // Pass via URL parameters
       const itemsParam = encodeURIComponent(JSON.stringify(items));
       setLocation(`/invoices?direct=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}`);
@@ -764,6 +762,11 @@ export default function CustomerRegistration() {
             ppfPrice: customerData.ppfPrice,
             laborCost: 0,
             otherServices: customerData.selectedOtherServices,
+            accessories: customerData.tempAccessoryName && customerData.accessoryQuantity > 0 ? [{
+              name: customerData.tempAccessoryName,
+              quantity: customerData.accessoryQuantity,
+              price: accessoryInventory.find(i => i.name === customerData.tempAccessoryName)?.price || 0
+            }] : [],
           },
         ],
       },

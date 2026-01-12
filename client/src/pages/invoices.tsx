@@ -144,11 +144,13 @@ export default function Invoices() {
           const price = prices?.[manualInvoiceData.vehicleType] || Object.values(prices || {})[0] || 0;
           item.unitPrice = price;
           item.category = "Service";
+          item.type = "service";
         } else {
           const selectedInventory = inventory.find((i: any) => i.name === value);
           if (selectedInventory) {
             item.unitPrice = selectedInventory.price || 0;
             item.category = selectedInventory.isPpf ? "PPF" : "Accessory";
+            item.type = selectedInventory.isPpf ? "ppf" : "accessory";
           }
         }
       }
