@@ -139,7 +139,6 @@ export default function Invoices() {
       } else {
         const selectedService = dbServices.find((s: any) => s.name === value);
         if (selectedService) {
-          // Try to match price by vehicle type if possible, or use first price
           const prices = selectedService.prices instanceof Map ? Object.fromEntries(selectedService.prices) : selectedService.prices;
           const price = prices?.[manualInvoiceData.vehicleType] || Object.values(prices || {})[0] || 0;
           item.unitPrice = price;
@@ -149,8 +148,9 @@ export default function Invoices() {
           const selectedInventory = inventory.find((i: any) => i.name === value);
           if (selectedInventory) {
             item.unitPrice = selectedInventory.price || 0;
-            item.category = selectedInventory.isPpf ? "PPF" : "Accessory";
-            item.type = selectedInventory.isPpf ? "ppf" : "accessory";
+            const isPpf = selectedInventory.isPpf || (selectedInventory.category && selectedInventory.category.toString().toLowerCase().includes('ppf'));
+            item.category = isPpf ? "PPF" : "Accessory";
+            item.type = isPpf ? "ppf" : "accessory";
           }
         }
       }
@@ -631,9 +631,9 @@ export default function Invoices() {
                 <div className="md:col-span-2 space-y-1">
                   <div className="flex justify-between items-center">
                     <Label className="text-xs">Description / Selection</Label>
-                    {item.category && (
+                    {(item.category || item.type) && (
                       <Badge variant="outline" className="text-[10px] h-4 py-0">
-                        {item.category}
+                        {item.category || (item.type === 'accessory' ? 'Accessory' : item.type === 'service' ? 'Service' : 'PPF')}
                       </Badge>
                     )}
                   </div>
