@@ -120,16 +120,21 @@ export default function Invoices() {
     
     // If selecting a predefined service or accessory
     if (field === 'description' && value) {
-      const selectedService = dbServices.find((s: any) => s.name === value);
-      if (selectedService) {
-        // Try to match price by vehicle type if possible, or use first price
-        const prices = selectedService.prices instanceof Map ? Object.fromEntries(selectedService.prices) : selectedService.prices;
-        const price = prices?.[manualInvoiceData.vehicleType] || Object.values(prices || {})[0] || 0;
-        item.unitPrice = price;
+      if (value === 'custom') {
+        item.description = '';
+        item.unitPrice = 0;
       } else {
-        const selectedInventory = inventory.find((i: any) => i.name === value);
-        if (selectedInventory) {
-          item.unitPrice = selectedInventory.price || 0;
+        const selectedService = dbServices.find((s: any) => s.name === value);
+        if (selectedService) {
+          // Try to match price by vehicle type if possible, or use first price
+          const prices = selectedService.prices instanceof Map ? Object.fromEntries(selectedService.prices) : selectedService.prices;
+          const price = prices?.[manualInvoiceData.vehicleType] || Object.values(prices || {})[0] || 0;
+          item.unitPrice = price;
+        } else {
+          const selectedInventory = inventory.find((i: any) => i.name === value);
+          if (selectedInventory) {
+            item.unitPrice = selectedInventory.price || 0;
+          }
         }
       }
     }
@@ -618,14 +623,19 @@ export default function Invoices() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="custom">Custom Entry...</SelectItem>
-                        <Separator />
+                        <Separator className="my-1" />
                         <div className="px-2 py-1 text-xs font-bold text-muted-foreground bg-muted/50">Services</div>
-                        {dbServices.map((s: any) => (
+                        {dbServices.filter((s: any) => !s.isPpf).map((s: any) => (
                           <SelectItem key={s._id} value={s.name}>{s.name}</SelectItem>
                         ))}
-                        <Separator />
-                        <div className="px-2 py-1 text-xs font-bold text-muted-foreground bg-muted/50">Inventory / PPF</div>
-                        {inventory.map((i: any) => (
+                        <Separator className="my-1" />
+                        <div className="px-2 py-1 text-xs font-bold text-muted-foreground bg-muted/50">Accessories</div>
+                        {accessoryInventory.map((i: any) => (
+                          <SelectItem key={i._id} value={i.name}>{i.name} ({i.quantity} {i.unit})</SelectItem>
+                        ))}
+                        <Separator className="my-1" />
+                        <div className="px-2 py-1 text-xs font-bold text-muted-foreground bg-muted/50">PPF Items</div>
+                        {ppfInventory.map((i: any) => (
                           <SelectItem key={i._id} value={i.name}>{i.name} ({i.quantity} {i.unit})</SelectItem>
                         ))}
                       </SelectContent>
