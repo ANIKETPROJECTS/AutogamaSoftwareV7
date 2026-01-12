@@ -749,8 +749,8 @@ export default function CustomerRegistration() {
 
     if (!validatePhone(customerData.phone)) {
       newErrors.phone = "Please enter a valid 10-digit mobile number";
-    } else {
-      // Check if phone number already exists
+    } else if (!isInvoiceDirect) {
+      // Check if phone number already exists only if NOT creating invoice directly
       try {
         const response = await fetch(
           `/api/customers/check-phone/${customerData.phone}`,
