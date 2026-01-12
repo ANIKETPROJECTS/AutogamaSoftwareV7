@@ -63,12 +63,24 @@ export default function Invoices() {
 
   useMemo(() => {
     if (isDirect && !manualInvoiceOpen) {
+      const itemsFromUrl = queryParams.get("items");
+      let initialItems = [{ description: "", quantity: 1, unitPrice: 0, type: "service" }];
+      
+      if (itemsFromUrl) {
+        try {
+          initialItems = JSON.parse(decodeURIComponent(itemsFromUrl));
+        } catch (e) {
+          console.error("Failed to parse items from URL", e);
+        }
+      }
+
       setManualInvoiceData({
         ...manualInvoiceData,
         customerName: queryParams.get("customerName") || "",
         customerPhone: queryParams.get("customerPhone") || "",
         vehicleName: queryParams.get("vehicleName") || "",
         plateNumber: queryParams.get("plateNumber") || "",
+        items: initialItems,
       });
       setManualInvoiceOpen(true);
       // Clean up URL

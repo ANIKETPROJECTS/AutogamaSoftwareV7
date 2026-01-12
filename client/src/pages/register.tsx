@@ -659,8 +659,32 @@ export default function CustomerRegistration() {
 
   const handleSubmit = () => {
     if (isInvoiceDirect) {
-      // Skip backend registration, just redirect to invoices with query params
-      setLocation(`/invoices?direct=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}`);
+      // Calculate selected services and accessories for auto-fill
+      const items = [];
+      
+      // Add PPF if selected
+      if (customerData.ppfCategory && customerData.ppfPrice > 0) {
+        items.push({
+          description: `${customerData.ppfCategory} - ${customerData.ppfWarranty}`,
+          quantity: 1,
+          unitPrice: customerData.ppfPrice,
+          type: "service"
+        });
+      }
+      
+      // Add other services
+      customerData.selectedOtherServices.forEach(s => {
+        items.push({
+          description: s.name,
+          quantity: 1,
+          unitPrice: s.price,
+          type: "service"
+        });
+      });
+      
+      // Pass via URL parameters
+      const itemsParam = encodeURIComponent(JSON.stringify(items));
+      setLocation(`/invoices?direct=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}`);
       return;
     }
 
