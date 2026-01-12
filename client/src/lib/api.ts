@@ -60,6 +60,7 @@ export const api = {
     getInvoice: (id: string) => request<any>(`/jobs/${id}/invoice`),
     generateInvoice: (id: string, taxRate?: number, discount?: number) => 
       request<any>(`/jobs/${id}/invoice`, { method: 'POST', body: JSON.stringify({ taxRate: taxRate ?? 18, discount: discount ?? 0 }) }),
+    createManualInvoice: (data: any) => request<any>('/invoices/manual', { method: 'POST', body: JSON.stringify(data) }),
   },
   
   invoices: {

@@ -597,12 +597,22 @@ export default function CustomerRegistration() {
     );
   }, [accessoryInventory, customerData.tempAccessoryCategory]);
 
+  const [isInvoiceDirect, setIsInvoiceDirect] = useState(false);
+
   const createCustomerMutation = useMutation({
     mutationFn: api.customers.create,
-    onSuccess: async () => {
+    onSuccess: async (customer) => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast({ title: "Customer registered successfully!" });
-      setLocation("/registered-customers");
+      
+      if (isInvoiceDirect) {
+        // Redirect to invoice generation for the first vehicle
+        // We'll pass the customer and vehicle info via location state or query params
+        // Assuming there's a way to handle this on the invoices page
+        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}`);
+      } else {
+        setLocation("/registered-customers");
+      }
     },
     onError: () => {
       toast({ title: "Failed to register customer", variant: "destructive" });
@@ -849,10 +859,24 @@ export default function CustomerRegistration() {
             data-testid="card-customer-info"
           >
             <CardHeader className="pb-6 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
-              <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
-                <User className="w-5 h-5 text-primary" />
-                Customer Information
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
+                  <User className="w-5 h-5 text-primary" />
+                  Customer Information
+                </CardTitle>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                    <Label htmlFor="invoice-direct" className="text-xs font-semibold text-slate-600">Create Invoice Directly</Label>
+                    <input
+                      type="checkbox"
+                      id="invoice-direct"
+                      checked={isInvoiceDirect}
+                      onChange={(e) => setIsInvoiceDirect(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                  </div>
+                </div>
+              </div>
               <p className="text-sm text-slate-600 mt-2">
                 Provide your personal details and service preferences
               </p>

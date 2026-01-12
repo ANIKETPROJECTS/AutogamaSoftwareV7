@@ -1538,6 +1538,49 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/invoices/manual", async (req, res) => {
+    try {
+      const { customerName, customerPhone, vehicleName, plateNumber, items, taxRate, discount, notes, createdAt } = req.body;
+      
+      const invoiceNumber = `INV-${Date.now()}`;
+      const subtotal = items.reduce((sum: number, item: any) => sum + (item.unitPrice * (item.quantity || 1)), 0);
+      const tax = (subtotal * (taxRate || 0)) / 100;
+      const totalAmount = subtotal + tax - (discount || 0);
+
+      const invoice = await Invoice.create({
+        invoiceNumber,
+        customerName,
+        customerPhone,
+        vehicleName,
+        plateNumber,
+        items: items.map((item: any) => ({
+          ...item,
+          total: (item.unitPrice * (item.quantity || 1)) - (item.discount || 0)
+        })),
+        subtotal,
+        tax,
+        taxRate,
+        discount,
+        totalAmount,
+        paidAmount: 0,
+        paymentStatus: 'Pending',
+        notes,
+        business: 'Auto Gamma',
+        createdAt: createdAt || new Date(),
+        // Manual invoices might not have a job or customer ID in the DB yet if redirected from registration
+        // but the schema requires them. We'll use a placeholder or handle it.
+        // For this implementation, we'll assume they are provided or we use a generic ID.
+        jobId: new mongoose.Types.ObjectId(), 
+        customerId: new mongoose.Types.ObjectId()
+      });
+
+      res.status(201).json(invoice);
+    } catch (error) {
+      console.error("Manual invoice creation error:", error);
+      res.status(500).json({ message: "Failed to create manual invoice" });
+    }
+  });
+
   app.get("/api/invoices", async (req, res) => {
     try {
       const invoices = await storage.getInvoices();

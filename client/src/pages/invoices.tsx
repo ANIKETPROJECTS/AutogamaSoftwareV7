@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -43,7 +44,70 @@ import {
 } from "@/components/ui/select";
 
 export default function Invoices() {
+  const [manualInvoiceOpen, setManualInvoiceOpen] = useState(false);
+  const [manualInvoiceDate, setManualInvoiceDate] = useState<Date>(new Date());
+  const [manualInvoiceData, setManualInvoiceData] = useState<any>({
+    customerName: "",
+    customerPhone: "",
+    vehicleName: "",
+    plateNumber: "",
+    items: [{ description: "", quantity: 1, unitPrice: 0, type: "service" }],
+    taxRate: 18,
+    discount: 0,
+    notes: ""
+  });
   const [search, setSearch] = useState("");
+
+  const queryParams = new URLSearchParams(window.location.search);
+  const isDirect = queryParams.get("direct") === "true";
+
+  useMemo(() => {
+    if (isDirect && !manualInvoiceOpen) {
+      setManualInvoiceData({
+        ...manualInvoiceData,
+        customerName: queryParams.get("customerName") || "",
+        customerPhone: queryParams.get("customerPhone") || "",
+        vehicleName: queryParams.get("vehicleName") || "",
+        plateNumber: queryParams.get("plateNumber") || "",
+      });
+      setManualInvoiceOpen(true);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [isDirect]);
+
+  const createManualInvoiceMutation = useMutation({
+    mutationFn: (data: any) => api.jobs.createManualInvoice(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      setManualInvoiceOpen(false);
+      toast({ title: "Invoice generated successfully" });
+    },
+    onError: (error: any) => {
+      toast({ title: error.message || "Failed to generate invoice", variant: "destructive" });
+    }
+  });
+
+  const handleManualInvoiceSubmit = () => {
+    createManualInvoiceMutation.mutate({
+      ...manualInvoiceData,
+      createdAt: manualInvoiceDate
+    });
+  };
+
+  const addManualItem = () => {
+    setManualInvoiceData({
+      ...manualInvoiceData,
+      items: [...manualInvoiceData.items, { description: "", quantity: 1, unitPrice: 0, type: "service" }]
+    });
+  };
+
+  const updateManualItem = (index: number, field: string, value: any) => {
+    const newItems = [...manualInvoiceData.items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setManualInvoiceData({ ...manualInvoiceData, items: newItems });
+  };
+
   const [sortBy, setSortBy] = useState<"date-desc" | "date-asc" | "amount-desc" | "amount-asc">("date-desc");
   const [filterStatus, setFilterStatus] = useState<"all" | "paid" | "unpaid">("all");
   const [filterBusiness, setFilterBusiness] = useState<string>("all");
@@ -436,6 +500,144 @@ export default function Invoices() {
 
   return (
     <div className="space-y-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Invoices & Tracking</h1>
+        <Button onClick={() => setManualInvoiceOpen(true)} className="bg-primary text-white">
+          <FileText className="w-4 h-4 mr-2" />
+          Generate Manual Invoice
+        </Button>
+      </div>
+
+      <Dialog open={manualInvoiceOpen} onOpenChange={setManualInvoiceOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Generate Manual Invoice</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Customer Name *</Label>
+              <Input 
+                value={manualInvoiceData.customerName}
+                onChange={(e) => setManualInvoiceData({...manualInvoiceData, customerName: e.target.value})}
+                placeholder="Enter customer name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Customer Phone *</Label>
+              <Input 
+                value={manualInvoiceData.customerPhone}
+                onChange={(e) => setManualInvoiceData({...manualInvoiceData, customerPhone: e.target.value})}
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Vehicle Name *</Label>
+              <Input 
+                value={manualInvoiceData.vehicleName}
+                onChange={(e) => setManualInvoiceData({...manualInvoiceData, vehicleName: e.target.value})}
+                placeholder="e.g. Toyota Fortuner"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Plate Number</Label>
+              <Input 
+                value={manualInvoiceData.plateNumber}
+                onChange={(e) => setManualInvoiceData({...manualInvoiceData, plateNumber: e.target.value})}
+                placeholder="e.g. MH01 AB 1234"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Invoice Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(manualInvoiceDate, "PPP")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={manualInvoiceDate}
+                    onSelect={(date) => date && setManualInvoiceDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          <Separator className="my-4" />
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">Items & Services</h3>
+              <Button type="button" variant="outline" size="sm" onClick={addManualItem}>Add Item</Button>
+            </div>
+            {manualInvoiceData.items.map((item: any, index: number) => (
+              <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end border p-2 rounded">
+                <div className="md:col-span-2 space-y-1">
+                  <Label className="text-xs">Description</Label>
+                  <Input 
+                    value={item.description}
+                    onChange={(e) => updateManualItem(index, "description", e.target.value)}
+                    placeholder="Service description"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Price</Label>
+                  <Input 
+                    type="number"
+                    value={item.unitPrice}
+                    onChange={(e) => updateManualItem(index, "unitPrice", parseFloat(e.target.value))}
+                  />
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-red-500"
+                  onClick={() => {
+                    const newItems = manualInvoiceData.items.filter((_: any, i: number) => i !== index);
+                    setManualInvoiceData({...manualInvoiceData, items: newItems});
+                  }}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            <div className="space-y-2">
+              <Label>Tax Rate (%)</Label>
+              <Input 
+                type="number"
+                value={manualInvoiceData.taxRate}
+                onChange={(e) => setManualInvoiceData({...manualInvoiceData, taxRate: parseFloat(e.target.value)})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Total Discount</Label>
+              <Input 
+                type="number"
+                value={manualInvoiceData.discount}
+                onChange={(e) => setManualInvoiceData({...manualInvoiceData, discount: parseFloat(e.target.value)})}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setManualInvoiceOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={handleManualInvoiceSubmit}
+              disabled={createManualInvoiceMutation.isPending || !manualInvoiceData.customerName || !manualInvoiceData.vehicleName}
+            >
+              Generate Invoice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
         <Card className="bg-gradient-to-br from-green-50 to-white border-red-300 shadow-sm" data-testid="card-total-revenue">
           <CardContent className="p-6">
