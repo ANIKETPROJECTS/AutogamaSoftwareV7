@@ -333,10 +333,14 @@ export default function Invoices() {
     // Use absolute paths for the images to ensure they load correctly in all contexts
     const logoUrl = `/${currentLogo}`;
     console.log("Logo selected:", { currentLogo, logoUrl, isBusiness2 });
+    const gstAmount = (invoice.totalAmount || 0) - (invoice.subtotal || 0);
+    const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
+
     const logoHtml = `<div style="text-align: center; width: 100%; min-height: 80px; margin-bottom: 10px;">
       <img src="${logoUrl}" 
            alt="${currentBusinessName} Logo" 
            style="height: 80px; width: auto; max-width: 250px; object-fit: contain; margin: 0 auto; display: block;" />
+      <p style="color: #6b7280; font-size: 14px; font-weight: 600; margin: 8px 0 0 0; text-transform: uppercase;">${gstLabel}</p>
     </div>`;
 
     return `
@@ -1100,11 +1104,14 @@ export default function Invoices() {
             const currentFooterText = isBusiness2 ? "AGNX" : "AUTOGAMMA - Premium Auto Detailing Studio";
             const currentLogo = isBusiness2 ? "logo2.png" : "logo.png";
             const logoUrl = `/${currentLogo}`;
+            const gstAmount = (selectedInvoice.totalAmount || 0) - (selectedInvoice.subtotal || 0);
+            const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
 
             return (
               <div ref={printRef} className="space-y-6">
                 <div className="header text-center">
                   <img src={logoUrl} alt={`${currentBusinessName} Logo`} className="h-10 mx-auto mb-2 object-contain" />
+                  <p className="text-muted-foreground uppercase font-bold text-sm tracking-wider">{gstLabel}</p>
                   <p className="text-muted-foreground">Invoice</p>
                 </div>
 
