@@ -433,6 +433,7 @@ export default function CustomerRegistration() {
     tempServiceVehicleType: "",
     technicianId: "",
     rollId: "",
+    ppfQuantity: 1,
   });
 
   const setManualRollId = (val: string) => {
@@ -713,21 +714,40 @@ export default function CustomerRegistration() {
     return Array.from(uniqueMap.values());
   }, [dbServices]);
 
+  const selectedRollData = useMemo(() => {
+    return allRolls.find(r => (r._id || r.name) === customerData.rollId);
+  }, [allRolls, customerData.rollId]);
+
   const handleSubmit = () => {
     if (isInvoiceDirect) {
       // Calculate selected services and accessories for auto-fill
       const items = [];
       
-      // Add PPF if selected
-      if (customerData.ppfCategory && customerData.ppfPrice > 0) {
+    // Add PPF if selected
+    if (customerData.ppfCategory && customerData.ppfPrice > 0) {
+      items.push({
+        description: `${customerData.ppfCategory} - ${customerData.ppfWarranty}`,
+        quantity: 1,
+        unitPrice: customerData.ppfPrice,
+        type: "service",
+        category: "PPF",
+      });
+    }
+
+    // Add Roll Item if selected
+    if (customerData.rollId && customerData.ppfQuantity > 0) {
+      const roll = allRolls.find(r => (r._id || r.name) === customerData.rollId);
+      if (roll) {
         items.push({
-          description: `${customerData.ppfCategory} - ${customerData.ppfWarranty}`,
-          quantity: 1,
-          unitPrice: customerData.ppfPrice,
-          type: "service",
-          category: "PPF"
+          description: `${roll.inventoryName} - ${roll.name} (${customerData.ppfQuantity} sqft)`,
+          quantity: customerData.ppfQuantity,
+          unitPrice: 0, // Usually price is covered by the service, or we can add it here if needed
+          type: "ppf",
+          category: "PPF",
+          rollId: customerData.rollId
         });
       }
+    }
       
       // Add other services
       customerData.selectedOtherServices.forEach(s => {
@@ -968,6 +988,25 @@ export default function CustomerRegistration() {
                     Customer Information
                   </CardTitle>
                   <div className="flex items-center space-x-2">
+                    {isInvoiceDirect && (
+                      <div className="mr-2">
+                        <Select
+                          value={customerData.technicianId}
+                          onValueChange={(val) => setCustomerData(prev => ({ ...prev, technicianId: val }))}
+                        >
+                          <SelectTrigger className="bg-white border-slate-300 h-8 w-[150px]">
+                            <SelectValue placeholder="Technician" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {technicians.map((tech: any) => (
+                              <SelectItem key={tech._id || tech.id} value={tech._id || tech.id}>
+                                {tech.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                     <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
                       <input
                         type="checkbox"
@@ -1231,31 +1270,68 @@ export default function CustomerRegistration() {
                           </Button>
                         )}
                       </div>
-                      <div className="space-y-4">
-                        {isInvoiceDirect && (
-                          <div className="space-y-4 animate-in fade-in duration-300">
-                            <div className="space-y-2">
-                              <Label className="text-xs font-semibold text-primary">Assign Technician</Label>
-                              <Select
-                                value={customerData.technicianId}
-                                onValueChange={(val) => setCustomerData(prev => ({ ...prev, technicianId: val }))}
-                              >
-                                <SelectTrigger className="bg-white border-primary/20 h-9">
-                                  <SelectValue placeholder="Select technician" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {technicians.map((tech: any) => (
-                                    <SelectItem key={tech._id || tech.id} value={tech._id || tech.id}>
-                                      {tech.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        )}
-                        <div className="space-y-2">
-                          <Label>PPF Category</Label>
+                        <div className="space-y-4">
+                          {isInvoiceDirect && (
+                            <Card className="border-primary/20 bg-blue-50/30">
+                              <CardContent className="pt-4 space-y-4">
+                                <div className="space-y-2">
+                                  <Select
+                                    value={customerData.rollId}
+                                    onValueChange={(val) => setManualRollId(val)}
+                                  >
+                                    <SelectTrigger className="bg-white border-primary/20 h-10">
+                                      <SelectValue placeholder="Select PPF roll" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {allRolls.map((roll: any) => (
+                                        <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
+                                          {roll.inventoryName} - {roll.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                {selectedRollData && (
+                                  <div className="bg-blue-100/50 rounded-lg p-3 flex justify-between items-center">
+                                    <span className="text-sm font-medium text-blue-800">Available Stock</span>
+                                    <span className="font-bold text-blue-900">
+                                      {(selectedRollData.remaining_sqft || selectedRollData.remainingSqft || 0).toFixed(2)} sq ft
+                                    </span>
+                                  </div>
+                                )}
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Quantity/Amount (sq ft)</Label>
+                                  <Input
+                                    type="number"
+                                    value={customerData.ppfQuantity}
+                                    onChange={(e) => setCustomerData(prev => ({ ...prev, ppfQuantity: parseFloat(e.target.value) || 0 }))}
+                                    className="bg-white border-primary/20"
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                </div>
+
+                                <Button 
+                                  className="w-full bg-white text-black border border-black hover:bg-slate-50"
+                                  variant="outline"
+                                  onClick={() => {
+                                    if (!customerData.rollId || customerData.ppfQuantity <= 0) {
+                                      toast({ title: "Please select a roll and quantity", variant: "destructive" });
+                                      return;
+                                    }
+                                    toast({ title: "PPF Item added to invoice" });
+                                  }}
+                                >
+                                  + Add Item
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          )}
+                          
+                          <div className="space-y-2">
+                            <Label>PPF Category</Label>
                           <Select
                             value={customerData.ppfCategory}
                             onValueChange={(value) =>
@@ -1527,26 +1603,6 @@ export default function CustomerRegistration() {
                               </Select>
                             </div>
 
-                            {isInvoiceDirect && (
-                              <div className="space-y-2 animate-in fade-in duration-300">
-                                <Label className="text-xs font-semibold text-primary">Select PPF Roll</Label>
-                                <Select
-                                  value={customerData.rollId}
-                                  onValueChange={(val) => setManualRollId(val)}
-                                >
-                                  <SelectTrigger className="bg-white border-primary/20 h-9">
-                                    <SelectValue placeholder="Select PPF roll" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {allRolls.map((roll: any) => (
-                                      <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
-                                        {roll.inventoryName} - {roll.name} ({roll.remaining_sqft || roll.remainingSqft} sqft left)
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            )}
 
                             {customerData.tempAccessoryCategory && (
                               <div className="space-y-2">
