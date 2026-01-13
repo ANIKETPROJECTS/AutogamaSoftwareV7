@@ -399,7 +399,7 @@ export default function Invoices() {
                   <td style="padding: 10px; border: 1px solid #e5e7eb;">${item.description}</td>
                   <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb;">₹${item.unitPrice.toLocaleString("en-IN")}</td>
                   <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb; color: #dc2626;">${item.discount > 0 ? `-₹${item.discount.toLocaleString("en-IN")}` : "—"}</td>
-                  <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb; font-weight: 500;">₹${item.total.toLocaleString("en-IN")}</td>
+                  <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb; font-weight: 500;">₹${(item.total - (item.discount || 0)).toLocaleString("en-IN")}</td>
                 </tr>
               `).join("")}
             </tbody>
@@ -1214,7 +1214,7 @@ export default function Invoices() {
                             </td>
                             <td className="text-right p-3 font-semibold">
                               <IndianRupee className="w-3 h-3 inline" />
-                              {item.total.toLocaleString("en-IN")}
+                              {(item.total - (item.discount || 0)).toLocaleString("en-IN")}
                             </td>
                           </tr>
                         ))}
