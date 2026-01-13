@@ -344,6 +344,9 @@ export default function Invoices() {
     </div>`;
 
             const calculatedSubtotal = invoice.items.reduce((sum: number, item: any) => sum + ((item.unitPrice * (item.quantity || 1)) - (item.discount || 0)), 0);
+            const calculatedGrandTotal = (invoice.totalAmount || (calculatedSubtotal + (invoice.taxAmount || 0) - (invoice.discount || 0)));
+            const calculatedGST = Math.max(0, calculatedGrandTotal - calculatedSubtotal);
+
             return `
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
         <div style="text-align: center; margin-bottom: 30px;">
@@ -437,11 +440,11 @@ export default function Invoices() {
             <div style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-bottom: 8px;"></div>
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
               <span>GST:</span>
-              <span>₹${(invoice.taxAmount || 0).toLocaleString("en-IN")}</span>
+              <span>₹${calculatedGST.toLocaleString("en-IN")}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 8px;">
               <span>Grand Total:</span>
-              <span>₹${(invoice.totalAmount || (invoice.subtotal + (invoice.taxAmount || 0) - (invoice.discount || 0))).toLocaleString("en-IN")}</span>
+              <span>₹${calculatedGrandTotal.toLocaleString("en-IN")}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; margin-bottom: 8px;">
               <span>Amount Paid:</span>
@@ -1109,6 +1112,8 @@ export default function Invoices() {
             const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
 
             const calculatedSubtotal = selectedInvoice.items.reduce((sum: number, item: any) => sum + ((item.unitPrice * (item.quantity || 1)) - (item.discount || 0)), 0);
+            const calculatedGrandTotal = (selectedInvoice.totalAmount || (calculatedSubtotal + (selectedInvoice.taxAmount || 0) - (selectedInvoice.discount || 0)));
+            const calculatedGST = Math.max(0, calculatedGrandTotal - calculatedSubtotal);
 
             return (
               <div ref={printRef} className="space-y-6">
@@ -1262,7 +1267,7 @@ export default function Invoices() {
                       <span>GST:</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-3 h-3" />
-                        {(selectedInvoice.taxAmount || 0).toLocaleString("en-IN")}
+                        {calculatedGST.toLocaleString("en-IN")}
                       </span>
                     </div>
                     {selectedInvoice.discount > 0 && (
@@ -1279,7 +1284,7 @@ export default function Invoices() {
                       <span>Grand Total:</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-4 h-4" />
-                        {(selectedInvoice.totalAmount || (selectedInvoice.subtotal + (selectedInvoice.taxAmount || 0) - (selectedInvoice.discount || 0))).toLocaleString("en-IN")}
+                        {calculatedGrandTotal.toLocaleString("en-IN")}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm text-slate-500">
