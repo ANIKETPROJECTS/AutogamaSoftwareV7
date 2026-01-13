@@ -690,17 +690,23 @@ export default function CustomerRegistration() {
   };
 
   const ppfCategoriesFromInventory = useMemo(() => {
+    // Collect all items that are either marked as isPpf or have 'ppf' in their category name
     const ppfItems = inventory.filter(
       (item: any) =>
-        item.isPpf ||
+        item.isPpf === true ||
         (item.category && item.category.toString().toLowerCase().includes("ppf")),
     );
+    
+    // Use the item name as the category name since that's how they're listed in the inventory screen
     const uniqueNames = Array.from(new Set(ppfItems.map((i: any) => i.name)));
+    
     return uniqueNames.map((name) => {
       const item = ppfItems.find((i: any) => i.name === name);
-      // We might still want warranty options from services if they exist, 
-      // but for now, let's just use the inventory names as categories.
-      const serviceMatch = dbServices.find((s: any) => s.name === name);
+      // Map warranty options from services based on matching name
+      const serviceMatch = dbServices.find((s: any) => 
+        s.name.toLowerCase().trim() === name.toLowerCase().trim()
+      );
+      
       return {
         _id: item._id || item.id || Math.random().toString(),
         name: name,
