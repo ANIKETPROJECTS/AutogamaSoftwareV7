@@ -747,7 +747,7 @@ export default function CustomerRegistration() {
       const technicianParam = customerData.technicianId ? `&technicianId=${customerData.technicianId}` : "";
       const rollParam = customerData.rollId ? `&rollId=${customerData.rollId}` : "";
       
-      setLocation(`/invoices?direct=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}${technicianParam}${rollParam}`);
+      setLocation(`/invoices?direct=true&autoSubmit=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}${technicianParam}${rollParam}`);
       return;
     }
 

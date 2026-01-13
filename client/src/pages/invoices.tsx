@@ -70,6 +70,7 @@ export default function Invoices() {
       const itemsFromUrl = queryParams.get("items");
       const technicianId = queryParams.get("technicianId");
       const rollId = queryParams.get("rollId");
+      const autoSubmit = queryParams.get("autoSubmit") === "true";
       let initialItems = [{ description: "", quantity: 1, unitPrice: 0, type: "service" }];
       
       if (itemsFromUrl) {
@@ -80,7 +81,7 @@ export default function Invoices() {
         }
       }
 
-      setManualInvoiceData({
+      const newInvoiceData = {
         ...manualInvoiceData,
         customerName: queryParams.get("customerName") || "",
         customerPhone: queryParams.get("customerPhone") || "",
@@ -89,8 +90,19 @@ export default function Invoices() {
         items: initialItems,
         technicianId: technicianId || "",
         rollId: rollId || "",
-      });
-      setManualInvoiceOpen(true);
+      };
+
+      setManualInvoiceData(newInvoiceData);
+      
+      if (autoSubmit) {
+        createManualInvoiceMutation.mutate({
+          ...newInvoiceData,
+          createdAt: manualInvoiceDate
+        });
+      } else {
+        setManualInvoiceOpen(true);
+      }
+
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
