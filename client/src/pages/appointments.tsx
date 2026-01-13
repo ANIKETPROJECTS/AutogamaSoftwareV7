@@ -494,12 +494,13 @@ export default function Appointments() {
           </DialogHeader>
           <form onSubmit={(e) => {
             e.preventDefault();
-            const reason = (new FormData(e.currentTarget)).get('reason') as string;
+            const formData = new FormData(e.currentTarget);
+            const reason = formData.get('cancelReason') as string;
             if (cancelData) updateStatusMutation.mutate({ id: cancelData.id, status: 'Cancelled', cancelReason: reason });
           }} className="space-y-4">
             <div>
-              <Label htmlFor="reason">Reason for cancellation</Label>
-              <Textarea id="reason" name="reason" placeholder="Enter reason..." required />
+              <Label htmlFor="cancelReason">Reason for cancellation</Label>
+              <Textarea id="cancelReason" name="cancelReason" placeholder="Enter reason..." required />
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setCancelData(null)}>Back</Button>

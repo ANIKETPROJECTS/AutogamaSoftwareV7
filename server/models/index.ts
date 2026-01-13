@@ -155,7 +155,8 @@ export interface IAppointment extends Document {
   date: Date;
   time: string;
   notes?: string;
-  status: 'Scheduled' | 'Done';
+  status: 'Scheduled' | 'Done' | 'Cancelled';
+  cancelReason?: string;
   createdAt: Date;
 }
 
@@ -391,7 +392,8 @@ const AppointmentSchema = new Schema<IAppointment>({
   date: { type: Date, required: true },
   time: { type: String, required: true },
   notes: { type: String },
-  status: { type: String, enum: ['Scheduled', 'Done'], default: 'Scheduled' },
+  status: { type: String, enum: ['Scheduled', 'Done', 'Cancelled'], default: 'Scheduled' },
+  cancelReason: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
