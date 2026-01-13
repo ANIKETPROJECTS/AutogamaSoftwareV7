@@ -594,7 +594,7 @@ export class MongoStorage implements IStorage {
     const subtotal = businessItems.reduce((sum: number, item: any) => sum + (item.price || 0), 0);
     const itemDiscounts = businessItems.reduce((sum: number, item: any) => sum + (item.discount || 0), 0);
     const taxableAmount = Math.max(0, subtotal - itemDiscounts - discount);
-    const taxAmount = (taxableAmount * taxRate) / 100;
+    const taxAmount = job.requiresGST ? (taxableAmount * taxRate) / 100 : 0;
     const totalAmount = taxableAmount + taxAmount;
     const lastInvoice = await Invoice.findOne({ business }).sort({ createdAt: -1 });
     let nextNum = 1;

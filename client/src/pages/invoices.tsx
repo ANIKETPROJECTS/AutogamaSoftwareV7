@@ -333,7 +333,7 @@ export default function Invoices() {
     // Use absolute paths for the images to ensure they load correctly in all contexts
     const logoUrl = `/${currentLogo}`;
     console.log("Logo selected:", { currentLogo, logoUrl, isBusiness2 });
-    const gstAmount = (invoice.taxAmount || invoice.tax || 0);
+    const gstAmount = (invoice.taxAmount || 0);
     const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
 
     const logoHtml = `<div style="text-align: center; width: 100%; min-height: 80px; margin-bottom: 10px;">
@@ -436,7 +436,7 @@ export default function Invoices() {
             <div style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-bottom: 8px;"></div>
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
               <span>GST:</span>
-              <span>₹${(invoice.taxAmount || invoice.tax || 0).toLocaleString("en-IN")}</span>
+              <span>₹${(invoice.taxAmount || 0).toLocaleString("en-IN")}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 8px;">
               <span>Grand Total:</span>
@@ -1104,7 +1104,7 @@ export default function Invoices() {
             const currentFooterText = isBusiness2 ? "AGNX" : "AUTOGAMMA - Premium Auto Detailing Studio";
             const currentLogo = isBusiness2 ? "logo2.png" : "logo.png";
             const logoUrl = `/${currentLogo}`;
-            const gstAmount = (selectedInvoice.taxAmount || selectedInvoice.tax || 0);
+            const gstAmount = (selectedInvoice.taxAmount || 0);
             const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
 
             return (
@@ -1259,7 +1259,7 @@ export default function Invoices() {
                       <span>GST:</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-3 h-3" />
-                        {(selectedInvoice.taxAmount || selectedInvoice.tax || 0).toLocaleString("en-IN")}
+                        {(selectedInvoice.taxAmount || 0).toLocaleString("en-IN")}
                       </span>
                     </div>
                     {selectedInvoice.discount > 0 && (
