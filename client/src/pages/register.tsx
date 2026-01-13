@@ -1092,27 +1092,6 @@ export default function CustomerRegistration() {
                   )}
                 </div>
 
-                {isInvoiceDirect && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <Label className="font-semibold text-primary">Assigned Technician</Label>
-                    <Select
-                      value={customerData.technicianId}
-                      onValueChange={(val) => setCustomerData({ ...customerData, technicianId: val })}
-                    >
-                      <SelectTrigger className="bg-white border-primary/30 h-10 shadow-sm">
-                        <SelectValue placeholder="Select technician" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {technicians.map((tech: any) => (
-                          <SelectItem key={tech._id} value={tech._id}>
-                            {tech.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
                 <div className="space-y-6">
                   <Label>How did you hear about us?</Label>
                   <Select
@@ -1169,27 +1148,6 @@ export default function CustomerRegistration() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {isInvoiceDirect && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <Label className="font-semibold text-primary">Assigned Technician</Label>
-                    <Select
-                      value={customerData.technicianId}
-                      onValueChange={(val) => setCustomerData({ ...customerData, technicianId: val })}
-                    >
-                      <SelectTrigger className="bg-white border-primary/30 h-10 shadow-sm">
-                        <SelectValue placeholder="Select technician" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {technicians.map((tech: any) => (
-                          <SelectItem key={tech._id} value={tech._id}>
-                            {tech.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
 
                 {customerData.referralSource === "Friend/Family" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
