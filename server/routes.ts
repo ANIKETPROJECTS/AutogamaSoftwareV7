@@ -265,7 +265,7 @@ export async function registerRoutes(
       inventory.forEach(inv => {
         const name = (inv.name || "").toLowerCase().trim();
         const category = (inv.category || "").toLowerCase().trim();
-        const isPpfFlag = inv.isPpf === true || String(inv.isPpf) === 'true' || inv.isPpf === 1;
+        const isPpfFlag = !!inv.isPpf || String(inv.isPpf) === 'true';
         
         const isPpf = isPpfFlag || 
                       ppfCategoryNames.some(catName => 
@@ -316,7 +316,7 @@ export async function registerRoutes(
       inventory.forEach(inv => {
         const name = (inv.name || "").toLowerCase().trim();
         const category = (inv.category || "").toLowerCase().trim();
-        const isPpfFlag = inv.isPpf === true || String(inv.isPpf) === 'true' || inv.isPpf === 1;
+        const isPpfFlag = !!inv.isPpf || String(inv.isPpf) === 'true';
         
         const isPpf = isPpfFlag || 
                       ppfCategoryNames.some(catName => 
@@ -407,14 +407,16 @@ export async function registerRoutes(
         }
 
         // 3. Add roll
-        await storage.addRoll(invItem._id.toString(), {
-          name: rollName,
-          meters: 0,
-          squareFeet: qty,
-          remaining_meters: 0,
-          remaining_sqft: qty,
-          unit: 'Square Feet'
-        });
+        if (invItem) {
+          await storage.addRoll(invItem._id.toString(), {
+            name: rollName,
+            meters: 0,
+            squareFeet: qty,
+            remaining_meters: 0,
+            remaining_sqft: qty,
+            unit: 'Square Feet'
+          });
+        }
       }
 
       res.json({ message: "PPF Import successful" });

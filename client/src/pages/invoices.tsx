@@ -62,7 +62,19 @@ export default function Invoices() {
   });
   const [search, setSearch] = useState("");
 
-  const queryParams = new URLSearchParams(window.location.search);
+  const createManualInvoiceMutation = useMutation({
+    mutationFn: (data: any) => api.jobs.createManualInvoice(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      setManualInvoiceOpen(false);
+      toast({ title: "Invoice generated successfully" });
+    },
+    onError: (error: any) => {
+      toast({ title: error.message || "Failed to generate invoice", variant: "destructive" });
+    }
+  });
+
+  const queryParams = useMemo(() => new URLSearchParams(window.location.search), []);
   const isDirect = queryParams.get("direct") === "true";
 
   useMemo(() => {
@@ -106,19 +118,7 @@ export default function Invoices() {
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [isDirect]);
-
-  const createManualInvoiceMutation = useMutation({
-    mutationFn: (data: any) => api.jobs.createManualInvoice(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      setManualInvoiceOpen(false);
-      toast({ title: "Invoice generated successfully" });
-    },
-    onError: (error: any) => {
-      toast({ title: error.message || "Failed to generate invoice", variant: "destructive" });
-    }
-  });
+  }, [isDirect, createManualInvoiceMutation, manualInvoiceOpen, queryParams, manualInvoiceData, manualInvoiceDate]);
 
   const { data: technicians = [] } = useQuery<any[]>({
     queryKey: ["/api/technicians"],
