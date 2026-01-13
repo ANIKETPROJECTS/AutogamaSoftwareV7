@@ -1227,6 +1227,28 @@ export default function CustomerRegistration() {
                         )}
                       </div>
                       <div className="space-y-4">
+                        {isInvoiceDirect && (
+                          <div className="space-y-4 animate-in fade-in duration-300">
+                            <div className="space-y-2">
+                              <Label className="text-xs font-semibold text-primary">Assign Technician</Label>
+                              <Select
+                                value={customerData.technicianId}
+                                onValueChange={(val) => setCustomerData(prev => ({ ...prev, technicianId: val }))}
+                              >
+                                <SelectTrigger className="bg-white border-primary/20 h-9">
+                                  <SelectValue placeholder="Select technician" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {technicians.map((tech: any) => (
+                                    <SelectItem key={tech._id || tech.id} value={tech._id || tech.id}>
+                                      {tech.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        )}
                         <div className="space-y-2">
                           <Label>PPF Category</Label>
                           <Select
@@ -1285,27 +1307,6 @@ export default function CustomerRegistration() {
                           </Select>
                         </div>
 
-                        {isInvoiceDirect && (
-                          <div className="space-y-2 animate-in fade-in duration-300">
-                            <Label className="text-xs font-semibold text-primary">Select PPF Roll</Label>
-                            <Select
-                              value={customerData.rollId}
-                              onValueChange={(val) => setManualRollId(val)}
-                              disabled={!customerData.ppfCategory}
-                            >
-                              <SelectTrigger className="bg-white border-primary/20 h-9">
-                                <SelectValue placeholder={customerData.ppfCategory ? "Select PPF roll" : "Select PPF category first"} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availableRolls.map((roll: any) => (
-                                  <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
-                                    {roll.name} ({roll.remaining_sqft || roll.remainingSqft} sqft left)
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
 
                         {customerData.ppfCategory && (
                           <div className="space-y-2">
@@ -1520,6 +1521,28 @@ export default function CustomerRegistration() {
                                 </SelectContent>
                               </Select>
                             </div>
+
+                            {isInvoiceDirect && (
+                              <div className="space-y-2 animate-in fade-in duration-300">
+                                <Label className="text-xs font-semibold text-primary">Select PPF Roll</Label>
+                                <Select
+                                  value={customerData.rollId}
+                                  onValueChange={(val) => setManualRollId(val)}
+                                  disabled={!customerData.ppfCategory}
+                                >
+                                  <SelectTrigger className="bg-white border-primary/20 h-9">
+                                    <SelectValue placeholder={customerData.ppfCategory ? "Select PPF roll" : "Select PPF category first"} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {availableRolls.map((roll: any) => (
+                                      <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
+                                        {roll.name} ({roll.remaining_sqft || roll.remainingSqft} sqft left)
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
 
                             {customerData.tempAccessoryCategory && (
                               <div className="space-y-2">
