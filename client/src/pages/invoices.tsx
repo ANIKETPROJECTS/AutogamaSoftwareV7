@@ -440,7 +440,7 @@ export default function Invoices() {
             </div>
             <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 8px;">
               <span>Grand Total:</span>
-              <span>₹${(invoice.totalAmount || 0).toLocaleString("en-IN")}</span>
+              <span>₹${(invoice.totalAmount || (invoice.subtotal + (invoice.taxAmount || 0) - (invoice.discount || 0))).toLocaleString("en-IN")}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; margin-bottom: 8px;">
               <span>Amount Paid:</span>
@@ -1276,7 +1276,7 @@ export default function Invoices() {
                       <span>Grand Total:</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-4 h-4" />
-                        {(selectedInvoice.subtotal + (selectedInvoice.tax || 0) - (selectedInvoice.discount || 0)).toLocaleString("en-IN")}
+                        {(selectedInvoice.totalAmount || (selectedInvoice.subtotal + (selectedInvoice.taxAmount || 0) - (selectedInvoice.discount || 0))).toLocaleString("en-IN")}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm text-slate-500">
