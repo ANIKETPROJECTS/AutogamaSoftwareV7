@@ -1280,14 +1280,45 @@ export default function CustomerRegistration() {
                                     onValueChange={(val) => setManualRollId(val)}
                                   >
                                     <SelectTrigger className="bg-white border-primary/20 h-10">
-                                      <SelectValue placeholder="Select PPF roll" />
+                                      <SelectValue placeholder="Choose a product" />
                                     </SelectTrigger>
-                                    <SelectContent>
-                                      {allRolls.map((roll: any) => (
-                                        <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
-                                          {roll.inventoryName} - {roll.name}
+                                    <SelectContent
+                                      position="popper"
+                                      className="max-h-60 w-[var(--radix-select-trigger-width)]"
+                                    >
+                                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                                        <Input
+                                          placeholder="Search product..."
+                                          className="h-8 text-sm"
+                                          onChange={(e) => {
+                                            const search =
+                                              e.target.value.toLowerCase();
+                                            const items = e.target
+                                              .closest('[role="listbox"]')
+                                              ?.querySelectorAll('[role="option"]');
+                                            items?.forEach((item) => {
+                                              const text =
+                                                item.textContent?.toLowerCase() || "";
+                                              (item as HTMLElement).style.display =
+                                                text.includes(search)
+                                                  ? "flex"
+                                                  : "none";
+                                            });
+                                          }}
+                                          onKeyDown={(e) => e.stopPropagation()}
+                                        />
+                                      </div>
+                                      {allRolls.length > 0 ? (
+                                        allRolls.map((roll: any) => (
+                                          <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
+                                            {roll.inventoryName} - {roll.name}
+                                          </SelectItem>
+                                        ))
+                                      ) : (
+                                        <SelectItem value="none" disabled>
+                                          No rolls available
                                         </SelectItem>
-                                      ))}
+                                      )}
                                     </SelectContent>
                                   </Select>
                                 </div>
