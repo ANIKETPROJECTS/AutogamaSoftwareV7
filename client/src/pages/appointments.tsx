@@ -400,13 +400,13 @@ export default function Appointments() {
                     <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">{format(new Date(appt.date), 'MMM dd, yyyy')}</td>
                     <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">{appt.time}</td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Badge className={cn("text-[10px] uppercase", STATUS_COLORS[appt.status])}>
+                      <div className="flex flex-col gap-1 min-w-[150px]">
+                        <Badge className={cn("text-[10px] uppercase w-fit", STATUS_COLORS[appt.status])}>
                           {appt.status}
                         </Badge>
                         {appt.status === 'Cancelled' && appt.cancelReason && (
-                          <span className="text-[11px] text-red-500 font-medium italic">
-                            ({appt.cancelReason})
+                          <span className="text-[12px] text-red-500 font-medium italic leading-tight">
+                            Reason: {appt.cancelReason}
                           </span>
                         )}
                       </div>
