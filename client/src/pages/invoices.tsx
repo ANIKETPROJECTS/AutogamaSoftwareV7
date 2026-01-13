@@ -333,7 +333,7 @@ export default function Invoices() {
     // Use absolute paths for the images to ensure they load correctly in all contexts
     const logoUrl = `/${currentLogo}`;
     console.log("Logo selected:", { currentLogo, logoUrl, isBusiness2 });
-    const gstAmount = (invoice.totalAmount || 0) - (invoice.subtotal || 0);
+    const gstAmount = (invoice.tax || 0);
     const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
 
     const logoHtml = `<div style="text-align: center; width: 100%; min-height: 80px; margin-bottom: 10px;">
@@ -436,11 +436,11 @@ export default function Invoices() {
             <div style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-bottom: 8px;"></div>
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
               <span>GST:</span>
-              <span>₹${((invoice.totalAmount || 0) - (invoice.subtotal || 0)).toLocaleString("en-IN")}</span>
+              <span>₹${(invoice.tax || 0).toLocaleString("en-IN")}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 8px;">
               <span>Grand Total:</span>
-              <span>₹${(invoice.totalAmount || 0).toLocaleString("en-IN")}</span>
+              <span>₹${((invoice.subtotal || 0) + (invoice.tax || 0) - (invoice.discount || 0)).toLocaleString("en-IN")}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; margin-bottom: 8px;">
               <span>Amount Paid:</span>
@@ -1104,7 +1104,7 @@ export default function Invoices() {
             const currentFooterText = isBusiness2 ? "AGNX" : "AUTOGAMMA - Premium Auto Detailing Studio";
             const currentLogo = isBusiness2 ? "logo2.png" : "logo.png";
             const logoUrl = `/${currentLogo}`;
-            const gstAmount = (selectedInvoice.totalAmount || 0) - (selectedInvoice.subtotal || 0);
+            const gstAmount = (selectedInvoice.tax || 0);
             const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
 
             return (
@@ -1259,7 +1259,7 @@ export default function Invoices() {
                       <span>GST:</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-3 h-3" />
-                        {(selectedInvoice.totalAmount - selectedInvoice.subtotal).toLocaleString("en-IN")}
+                        {(selectedInvoice.tax || 0).toLocaleString("en-IN")}
                       </span>
                     </div>
                     {selectedInvoice.discount > 0 && (
@@ -1276,7 +1276,7 @@ export default function Invoices() {
                       <span>Grand Total:</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-4 h-4" />
-                        {selectedInvoice.totalAmount.toLocaleString("en-IN")}
+                        {(selectedInvoice.subtotal + (selectedInvoice.tax || 0) - (selectedInvoice.discount || 0)).toLocaleString("en-IN")}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm text-slate-500">
