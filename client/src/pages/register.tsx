@@ -546,10 +546,15 @@ export default function CustomerRegistration() {
     );
   }, [inventory, customerData.ppfCategory]);
 
-  const availableRolls = useMemo(() => {
-    if (!selectedPpfInventory) return [];
-    return (selectedPpfInventory.rolls || []).filter((r: any) => r.status !== 'Finished');
-  }, [selectedPpfInventory]);
+  const allRolls = useMemo(() => {
+    return inventory
+      .filter((item: any) => item.isPpf || (item.category && item.category.toString().toLowerCase().includes('ppf')))
+      .flatMap((item: any) => (item.rolls || []).map((roll: any) => ({
+        ...roll,
+        inventoryName: item.name
+      })))
+      .filter((r: any) => r.status !== 'Finished');
+  }, [inventory]);
 
   const [isAddingService, setIsAddingService] = useState(false);
   const [newService, setNewService] = useState({
@@ -1528,15 +1533,14 @@ export default function CustomerRegistration() {
                                 <Select
                                   value={customerData.rollId}
                                   onValueChange={(val) => setManualRollId(val)}
-                                  disabled={!customerData.ppfCategory}
                                 >
                                   <SelectTrigger className="bg-white border-primary/20 h-9">
-                                    <SelectValue placeholder={customerData.ppfCategory ? "Select PPF roll" : "Select PPF category first"} />
+                                    <SelectValue placeholder="Select PPF roll" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    {availableRolls.map((roll: any) => (
+                                    {allRolls.map((roll: any) => (
                                       <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
-                                        {roll.name} ({roll.remaining_sqft || roll.remainingSqft} sqft left)
+                                        {roll.inventoryName} - {roll.name} ({roll.remaining_sqft || roll.remainingSqft} sqft left)
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
