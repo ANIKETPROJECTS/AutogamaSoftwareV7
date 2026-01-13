@@ -689,30 +689,26 @@ export default function CustomerRegistration() {
     }
   };
 
-  const ppfCategoriesFromServices = useMemo(() => {
-    // Only get services explicitly marked as PPF in the database
-    const servicesFromDb = (dbServices || [])
-      .filter((s: any) => s && (s.isPpf === true || s.isPPF === true))
-      .map((s: any) => ({
-        _id: s._id || s.id || Math.random().toString(),
-        name: s.name,
+  const ppfCategoriesFromInventory = useMemo(() => {
+    const ppfItems = inventory.filter(
+      (item: any) =>
+        item.isPpf ||
+        (item.category && item.category.toString().toLowerCase().includes("ppf")),
+    );
+    const uniqueNames = Array.from(new Set(ppfItems.map((i: any) => i.name)));
+    return uniqueNames.map((name) => {
+      const item = ppfItems.find((i: any) => i.name === name);
+      // We might still want warranty options from services if they exist, 
+      // but for now, let's just use the inventory names as categories.
+      const serviceMatch = dbServices.find((s: any) => s.name === name);
+      return {
+        _id: item._id || item.id || Math.random().toString(),
+        name: name,
         isPpf: true,
-        warrantyOptions: s.warrantyOptions
-      }));
-
-    // Combine and remove duplicates by name
-    const uniqueMap = new Map();
-    servicesFromDb.forEach(item => {
-      if (item && item.name) {
-        const lowerName = item.name.toLowerCase().trim();
-        if (!uniqueMap.has(lowerName)) {
-          uniqueMap.set(lowerName, item);
-        }
-      }
+        warrantyOptions: serviceMatch?.warrantyOptions || {},
+      };
     });
-
-    return Array.from(uniqueMap.values());
-  }, [dbServices]);
+  }, [inventory, dbServices]);
 
   const selectedRollData = useMemo(() => {
     return allRolls.find(r => (r._id || r.name) === customerData.rollId);
@@ -1404,15 +1400,15 @@ export default function CustomerRegistration() {
                                   onKeyDown={(e) => e.stopPropagation()}
                                 />
                               </div>
-                              {ppfCategoriesFromServices.length > 0 ? (
-                                ppfCategoriesFromServices.map((cat: any) => (
+                              {ppfCategoriesFromInventory.length > 0 ? (
+                                ppfCategoriesFromInventory.map((cat: any) => (
                                   <SelectItem key={cat._id} value={cat.name}>
                                     {cat.name}
                                   </SelectItem>
                                 ))
                               ) : (
                                 <SelectItem value="no-ppf" disabled>
-                                  No PPF Services Found
+                                  No PPF Inventory Found
                                 </SelectItem>
                               )}
                             </SelectContent>
@@ -1467,7 +1463,7 @@ export default function CustomerRegistration() {
                                   />
                                 </div>
                                 {(() => {
-                                  const selectedCat = ppfCategoriesFromServices.find(c => c.name === customerData.ppfCategory);
+                                  const selectedCat = ppfCategoriesFromInventory.find(c => c.name === customerData.ppfCategory);
                                   const options = selectedCat?.warrantyOptions || {};
                                   return Object.keys(options).map((type) => (
                                     <SelectItem key={type} value={type}>
@@ -1486,7 +1482,7 @@ export default function CustomerRegistration() {
                             <Select
                               value={customerData.ppfWarranty}
                               onValueChange={(value) => {
-                                const selectedCat = ppfCategoriesFromServices.find(c => c.name === customerData.ppfCategory);
+                                const selectedCat = ppfCategoriesFromInventory.find(c => c.name === customerData.ppfCategory);
                                 const vehicleOptions = selectedCat?.warrantyOptions?.[customerData.ppfVehicleType] || [];
                                 const option = vehicleOptions.find((o: any) => o.warranty === value);
                                 const price = option?.price || 0;
@@ -1531,7 +1527,7 @@ export default function CustomerRegistration() {
                                   />
                                 </div>
                                 {(() => {
-                                  const selectedCat = ppfCategoriesFromServices.find(c => c.name === customerData.ppfCategory);
+                                  const selectedCat = ppfCategoriesFromInventory.find(c => c.name === customerData.ppfCategory);
                                   const vehicleOptions = selectedCat?.warrantyOptions?.[customerData.ppfVehicleType] || [];
                                   return vehicleOptions.map((opt: any) => (
                                     <SelectItem key={opt.warranty} value={opt.warranty}>
