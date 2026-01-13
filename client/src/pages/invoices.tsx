@@ -343,7 +343,8 @@ export default function Invoices() {
       <p style="color: #6b7280; font-size: 14px; font-weight: 600; margin: 8px 0 0 0; text-transform: uppercase;">${gstLabel}</p>
     </div>`;
 
-    return `
+            const calculatedSubtotal = invoice.items.reduce((sum: number, item: any) => sum + ((item.unitPrice * (item.quantity || 1)) - (item.discount || 0)), 0);
+            return `
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
         <div style="text-align: center; margin-bottom: 30px;">
           ${logoHtml}
@@ -419,7 +420,7 @@ export default function Invoices() {
           <div style="border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; background-color: #f9fafb;">
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
               <span>Subtotal:</span>
-              <span>₹${invoice.subtotal.toLocaleString("en-IN")}</span>
+              <span>₹${calculatedSubtotal.toLocaleString("en-IN")}</span>
             </div>
             ${invoice.tax > 0 ? `
               <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
@@ -1107,6 +1108,8 @@ export default function Invoices() {
             const gstAmount = (selectedInvoice.taxAmount || 0);
             const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
 
+            const calculatedSubtotal = selectedInvoice.items.reduce((sum: number, item: any) => sum + ((item.unitPrice * (item.quantity || 1)) - (item.discount || 0)), 0);
+
             return (
               <div ref={printRef} className="space-y-6">
                 <div className="header text-center">
@@ -1252,7 +1255,7 @@ export default function Invoices() {
                       <span>Subtotal:</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-3 h-3" />
-                        {selectedInvoice.subtotal.toLocaleString("en-IN")}
+                        {calculatedSubtotal.toLocaleString("en-IN")}
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-600">
