@@ -123,6 +123,7 @@ const validateEmail = (email: string): boolean => {
 const STATUS_COLORS: Record<string, string> = {
   'Scheduled': 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300',
   'Done': 'bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300',
+  'Cancelled': 'bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-300',
 };
 
 export default function Appointments() {
@@ -130,7 +131,10 @@ export default function Appointments() {
   const [searchQuery, setSearchQuery] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [cancelData, setCancelData] = useState<{ id: string } | null>(null);
+  const [rescheduleData, setRescheduleData] = useState<any | null>(null);
   const [time, setTime] = useState('09:00');
+  const [rescheduleTime, setRescheduleTime] = useState('09:00');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -167,9 +171,21 @@ export default function Appointments() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) => api.appointments.update(id, { status }),
+    mutationFn: ({ id, status, cancelReason }: { id: string; status: string; cancelReason?: string }) => 
+      api.appointments.update(id, { status, cancelReason }),
     onSuccess: () => {
-      toast({ title: 'Status updated' });
+      toast({ title: 'Appointment updated' });
+      setCancelData(null);
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    }
+  });
+
+  const rescheduleMutation = useMutation({
+    mutationFn: ({ id, date, time }: { id: string; date: string; time: string }) => 
+      api.appointments.update(id, { date, time }),
+    onSuccess: () => {
+      toast({ title: 'Appointment rescheduled' });
+      setRescheduleData(null);
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
     }
   });
@@ -282,6 +298,7 @@ export default function Appointments() {
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="Scheduled">Scheduled</SelectItem>
               <SelectItem value="Done">Done</SelectItem>
+              <SelectItem value="Cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -385,17 +402,41 @@ export default function Appointments() {
                       <Badge className={cn("text-[10px] uppercase", STATUS_COLORS[appt.status])}>
                         {appt.status}
                       </Badge>
+                      {appt.status === 'Cancelled' && appt.cancelReason && (
+                        <p className="text-[10px] text-red-500 mt-1">Reason: {appt.cancelReason}</p>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-right">
                       <div className="flex gap-2 justify-end">
                         {appt.status === 'Scheduled' && (
-                          <Button 
-                            size="sm" 
-                            className="h-8 text-xs" 
-                            onClick={() => updateStatusMutation.mutate({ id: appt._id, status: 'Done' })}
-                          >
-                            Mark Done
-                          </Button>
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="h-8 text-xs" 
+                              onClick={() => {
+                                setRescheduleData(appt);
+                                setRescheduleTime(appt.time);
+                              }}
+                            >
+                              Reschedule
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="h-8 text-xs text-orange-600 hover:text-orange-700" 
+                              onClick={() => setCancelData({ id: appt._id })}
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              className="h-8 text-xs" 
+                              onClick={() => updateStatusMutation.mutate({ id: appt._id, status: 'Done' })}
+                            >
+                              Mark Done
+                            </Button>
+                          </>
                         )}
                         <Button 
                           size="icon" 
@@ -440,6 +481,59 @@ export default function Appointments() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!cancelData} onOpenChange={(open) => !open && setCancelData(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Appointment</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const reason = (new FormData(e.currentTarget)).get('reason') as string;
+            if (cancelData) updateStatusMutation.mutate({ id: cancelData.id, status: 'Cancelled', cancelReason: reason });
+          }} className="space-y-4">
+            <div>
+              <Label htmlFor="reason">Reason for cancellation</Label>
+              <Textarea id="reason" name="reason" placeholder="Enter reason..." required />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setCancelData(null)}>Back</Button>
+              <Button type="submit" variant="destructive" disabled={updateStatusMutation.isPending}>
+                {updateStatusMutation.isPending ? 'Cancelling...' : 'Confirm Cancellation'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!rescheduleData} onOpenChange={(open) => !open && setRescheduleData(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reschedule Appointment</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const date = formData.get('date') as string;
+            if (rescheduleData) rescheduleMutation.mutate({ id: rescheduleData._id, date, time: rescheduleTime });
+          }} className="space-y-4">
+            <div>
+              <Label htmlFor="rescheduleDate">New Date</Label>
+              <Input id="rescheduleDate" name="date" type="date" required defaultValue={rescheduleData?.date ? format(new Date(rescheduleData.date), 'yyyy-MM-dd') : ''} min={format(new Date(), 'yyyy-MM-dd')} />
+            </div>
+            <div>
+              <Label>New Time</Label>
+              <TimePicker value={rescheduleTime} onChange={setRescheduleTime} />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setRescheduleData(null)}>Back</Button>
+              <Button type="submit" disabled={rescheduleMutation.isPending}>
+                {rescheduleMutation.isPending ? 'Rescheduling...' : 'Reschedule'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
