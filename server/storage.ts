@@ -76,6 +76,7 @@ export interface IStorage {
   addPaymentToJobWithInvoiceSync(jobId: string, payment: any): Promise<IJob | null>;
   addMaterialsToJob(jobId: string, materials: { inventoryId: string; quantity: number }[]): Promise<IJob | null>;
   markInvoicePaid(invoiceId: string, paymentMode?: string, otherPaymentDetails?: string): Promise<IInvoice | null>;
+  deleteInvoice(id: string): Promise<void>;
 }
 
 export class MongoStorage implements IStorage {
@@ -694,6 +695,11 @@ export class MongoStorage implements IStorage {
       paymentMode, 
       otherPaymentDetails 
     }, { new: true });
+  }
+
+  async deleteInvoice(id: string): Promise<void> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return;
+    await Invoice.findByIdAndDelete(id);
   }
 }
 

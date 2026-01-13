@@ -1761,5 +1761,14 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/invoices/:id", async (req, res) => {
+    try {
+      await storage.deleteInvoice(req.params.id);
+      res.json({ message: "Invoice deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete invoice" });
+    }
+  });
+
   return httpServer;
 }

@@ -22,6 +22,7 @@ import {
   Filter,
   ArrowUpDown,
   CreditCard,
+  Trash2,
 } from "lucide-react";
 import { useState, useRef, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -196,6 +197,19 @@ export default function Invoices() {
     onError: () => {
       toast({ title: "Failed to mark invoice as paid", variant: "destructive" });
     },
+  });
+
+  const deleteInvoiceMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/invoices/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      toast({ title: "Invoice deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to delete", description: error.message, variant: "destructive" });
+    }
   });
 
   let filteredInvoices = invoices.filter((invoice: any) => {
@@ -1070,6 +1084,20 @@ export default function Invoices() {
                           Mark Paid
                         </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="border-slate-200 text-slate-700 hover:text-red-600 hover:border-red-200"
+                        onClick={() => {
+                          if (confirm("Are you sure you want to delete this invoice?")) {
+                            deleteInvoiceMutation.mutate(invoice._id);
+                          }
+                        }}
+                        disabled={deleteInvoiceMutation.isPending}
+                        data-testid={`button-delete-invoice-${invoice._id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
