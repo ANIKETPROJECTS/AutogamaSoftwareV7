@@ -411,7 +411,7 @@ export default function Appointments() {
                           {appt.status}
                         </Badge>
                         {appt.status === 'Cancelled' && appt.cancelReason && (
-                          <span className="text-[12px] text-red-500 font-medium italic leading-tight">
+                          <span className="text-[12px] text-red-500 font-medium italic leading-tight break-words whitespace-normal max-w-[200px]">
                             Reason: {appt.cancelReason}
                           </span>
                         )}
