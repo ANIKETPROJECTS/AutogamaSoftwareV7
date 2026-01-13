@@ -432,7 +432,7 @@ export default function Invoices() {
             <div style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-bottom: 8px;"></div>
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
               <span>GST:</span>
-              <span>₹${(invoice.tax || 0).toLocaleString("en-IN")}</span>
+              <span>₹${((invoice.totalAmount || 0) - (invoice.subtotal || 0)).toLocaleString("en-IN")}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 8px;">
               <span>Grand Total:</span>
@@ -1252,7 +1252,7 @@ export default function Invoices() {
                       <span>GST:</span>
                       <span className="flex items-center">
                         <IndianRupee className="w-3 h-3" />
-                        {(selectedInvoice.tax || 0).toLocaleString("en-IN")}
+                        {(selectedInvoice.totalAmount - selectedInvoice.subtotal).toLocaleString("en-IN")}
                       </span>
                     </div>
                     {selectedInvoice.discount > 0 && (
