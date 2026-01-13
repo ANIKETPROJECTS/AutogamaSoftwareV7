@@ -430,6 +430,10 @@ export default function Invoices() {
               </div>
             ` : ""}
             <div style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-bottom: 8px;"></div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; margin-bottom: 8px;">
+              <span>GST:</span>
+              <span>${invoice.tax > 0 ? `₹${invoice.tax.toLocaleString("en-IN")}` : "Non-GST (₹0)"}</span>
+            </div>
             <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 8px;">
               <span>Grand Total:</span>
               <span>₹${invoice.totalAmount.toLocaleString("en-IN")}</span>
@@ -1244,15 +1248,19 @@ export default function Invoices() {
                         {selectedInvoice.subtotal.toLocaleString("en-IN")}
                       </span>
                     </div>
-                    {selectedInvoice.tax > 0 && (
-                      <div className="flex justify-between text-slate-600">
-                        <span>Tax ({selectedInvoice.taxRate}%):</span>
-                        <span className="flex items-center">
-                          <IndianRupee className="w-3 h-3" />
-                          {selectedInvoice.tax.toLocaleString("en-IN")}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex justify-between text-slate-600">
+                      <span>GST:</span>
+                      <span className="flex items-center">
+                        {selectedInvoice.tax > 0 ? (
+                          <>
+                            <IndianRupee className="w-3 h-3" />
+                            {selectedInvoice.tax.toLocaleString("en-IN")}
+                          </>
+                        ) : (
+                          "Non-GST (₹0)"
+                        )}
+                      </span>
+                    </div>
                     {selectedInvoice.discount > 0 && (
                       <div className="flex justify-between text-red-600">
                         <span>Total Discount:</span>
