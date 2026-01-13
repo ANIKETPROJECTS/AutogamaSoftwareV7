@@ -65,7 +65,7 @@ export interface IServiceItem {
   rollId?: mongoose.Types.ObjectId;
   rollName?: string;
   sizeUsed?: string;
-  assignedBusiness?: 'Auto Gamma' | 'Business 2';
+  assignedBusiness?: 'Auto Gamma' | 'AGNX';
 }
 
 export interface IPayment {
@@ -271,7 +271,7 @@ const ServiceItemSchema = new Schema<IServiceItem>({
   rollId: { type: Schema.Types.ObjectId, ref: 'Inventory.rolls' },
   rollName: { type: String },
   sizeUsed: { type: String },
-  assignedBusiness: { type: String, enum: ['Auto Gamma', 'Business 2'], default: 'Auto Gamma' }
+  assignedBusiness: { type: String, enum: ['Auto Gamma', 'AGNX'], default: 'Auto Gamma' }
 });
 
 const PaymentSchema = new Schema<IPayment>({

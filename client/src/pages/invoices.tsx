@@ -215,8 +215,8 @@ export default function Invoices() {
 
     const matchesBusiness =
       filterBusiness === "all" ||
-      (filterBusiness === "Auto Gamma" && !invoice.businessId?.includes("business_2") && !invoice.business?.includes("Business 2")) ||
-      (filterBusiness === "Business 2" && (invoice.businessId?.includes("business_2") || invoice.business?.includes("Business 2")));
+      (filterBusiness === "Auto Gamma" && !invoice.businessId?.includes("business_2") && !invoice.business?.includes("AGNX")) ||
+      (filterBusiness === "AGNX" && (invoice.businessId?.includes("business_2") || invoice.business?.includes("AGNX")));
     
     const matchesDate = (() => {
       if (timeFilter !== "all") {
@@ -300,19 +300,19 @@ export default function Invoices() {
     };
 
     const rawBiz = String(invoice.business || "");
-    const isBusiness2 = rawBiz === "Business 2" || 
-                       rawBiz.toLowerCase().includes("business 2") || 
+    const isBusiness2 = rawBiz === "AGNX" || 
+                       rawBiz.toLowerCase().includes("AGNX") || 
                        rawBiz.toLowerCase().includes("business2") || 
                        invoice.businessId === "business_2" ||
                        (invoice.items && invoice.items.some((item: any) => 
-                         item.assignedBusiness === 'Business 2' || 
-                         (item.description && item.description.toLowerCase().includes('business 2')) ||
-                         (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('business 2'))
+                         item.assignedBusiness === 'AGNX' || 
+                         (item.description && item.description.toLowerCase().includes('AGNX')) ||
+                         (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('AGNX'))
                        )) ||
                        (invoice.serviceItems && invoice.serviceItems.some((item: any) => 
-                         item.assignedBusiness === 'Business 2' || 
-                         (item.description && item.description.toLowerCase().includes('business 2')) ||
-                         (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('business 2'))
+                         item.assignedBusiness === 'AGNX' || 
+                         (item.description && item.description.toLowerCase().includes('AGNX')) ||
+                         (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('AGNX'))
                        ));
     
     console.log("Invoice Branding Check:", {
@@ -322,12 +322,12 @@ export default function Invoices() {
       businessId: invoice.businessId,
       itemCount: invoice.items?.length,
       serviceItemCount: invoice.serviceItems?.length,
-      hasBusiness2Item: invoice.items?.some((i: any) => i.assignedBusiness === 'Business 2' || i.assignedBusiness?.toLowerCase().includes('business 2')),
-      hasBusiness2ServiceItem: invoice.serviceItems?.some((i: any) => i.assignedBusiness === 'Business 2' || i.assignedBusiness?.toLowerCase().includes('business 2'))
+      hasBusiness2Item: invoice.items?.some((i: any) => i.assignedBusiness === 'AGNX' || i.assignedBusiness?.toLowerCase().includes('AGNX')),
+      hasBusiness2ServiceItem: invoice.serviceItems?.some((i: any) => i.assignedBusiness === 'AGNX' || i.assignedBusiness?.toLowerCase().includes('AGNX'))
     });
 
-    const currentBusinessName = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA";
-    const currentFooterText = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
+    const currentBusinessName = isBusiness2 ? "AGNX" : "AUTOGAMMA";
+    const currentFooterText = isBusiness2 ? "AGNX" : "AUTOGAMMA - Premium Auto Detailing Studio";
     const currentLogo = isBusiness2 ? "logo2.png" : "logo.png";
 
     // Use absolute paths for the images to ensure they load correctly in all contexts
@@ -343,7 +343,7 @@ export default function Invoices() {
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
         <div style="text-align: center; margin-bottom: 30px;">
           ${logoHtml}
-          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Tax Invoice</p>
+          <p style="color: #9ca3af; font-size: 12px; margin: 0;">Invoice</p>
         </div>
         
         <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
@@ -832,7 +832,7 @@ export default function Invoices() {
               <SelectContent>
                 <SelectItem value="all">All Businesses</SelectItem>
                 <SelectItem value="Auto Gamma">Auto Gamma</SelectItem>
-                <SelectItem value="Business 2">Business 2</SelectItem>
+                <SelectItem value="AGNX">AGNX</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1077,23 +1077,23 @@ export default function Invoices() {
 
           {selectedInvoice && (() => {
             const rawBiz = String(selectedInvoice.business || "");
-            const isBusiness2 = rawBiz === "Business 2" || 
-                               rawBiz.toLowerCase().includes("business 2") || 
+            const isBusiness2 = rawBiz === "AGNX" || 
+                               rawBiz.toLowerCase().includes("AGNX") || 
                                rawBiz.toLowerCase().includes("business2") || 
                                selectedInvoice.businessId === "business_2" ||
                                (selectedInvoice.items && selectedInvoice.items.some((item: any) => 
-                                 item.assignedBusiness === 'Business 2' || 
-                                 (item.description && item.description.toLowerCase().includes('business 2')) ||
-                                 (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('business 2'))
+                                 item.assignedBusiness === 'AGNX' || 
+                                 (item.description && item.description.toLowerCase().includes('AGNX')) ||
+                                 (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('AGNX'))
                                )) ||
                                (selectedInvoice.serviceItems && selectedInvoice.serviceItems.some((item: any) => 
-                                 item.assignedBusiness === 'Business 2' || 
-                                 (item.description && item.description.toLowerCase().includes('business 2')) ||
-                                 (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('business 2'))
+                                 item.assignedBusiness === 'AGNX' || 
+                                 (item.description && item.description.toLowerCase().includes('AGNX')) ||
+                                 (item.assignedBusiness && item.assignedBusiness.toLowerCase().includes('AGNX'))
                                ));
             
-            const currentBusinessName = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA";
-            const currentFooterText = isBusiness2 ? "BUSINESS 2" : "AUTOGAMMA - Premium Auto Detailing Studio";
+            const currentBusinessName = isBusiness2 ? "AGNX" : "AUTOGAMMA";
+            const currentFooterText = isBusiness2 ? "AGNX" : "AUTOGAMMA - Premium Auto Detailing Studio";
             const currentLogo = isBusiness2 ? "logo2.png" : "logo.png";
             const logoUrl = `/${currentLogo}`;
 
@@ -1101,7 +1101,7 @@ export default function Invoices() {
               <div ref={printRef} className="space-y-6">
                 <div className="header text-center">
                   <img src={logoUrl} alt={`${currentBusinessName} Logo`} className="h-10 mx-auto mb-2 object-contain" />
-                  <p className="text-muted-foreground">Tax Invoice</p>
+                  <p className="text-muted-foreground">Invoice</p>
                 </div>
 
                 <div className="flex justify-between gap-4 flex-wrap">

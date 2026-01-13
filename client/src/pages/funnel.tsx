@@ -375,7 +375,7 @@ export default function CustomerFunnel() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Auto Gamma">Auto Gamma</SelectItem>
-                        <SelectItem value="Business 2">Business 2</SelectItem>
+                        <SelectItem value="AGNX">AGNX</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

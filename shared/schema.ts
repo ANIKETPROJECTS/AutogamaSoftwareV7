@@ -48,7 +48,7 @@ export const serviceItemSchema = z.object({
   description: z.string().min(1),
   cost: z.number().min(0),
   type: z.enum(['part', 'labor']),
-  assignedBusiness: z.enum(['Auto Gamma', 'Business 2']).default('Auto Gamma')
+  assignedBusiness: z.enum(['Auto Gamma', 'AGNX']).default('Auto Gamma')
 });
 
 export const paymentSchema = z.object({
