@@ -56,7 +56,9 @@ export default function Invoices() {
     items: [{ description: "", quantity: 1, unitPrice: 0, type: "service" }],
     taxRate: 18,
     discount: 0,
-    notes: ""
+    notes: "",
+    technicianId: "",
+    rollId: "",
   });
   const [search, setSearch] = useState("");
 
@@ -66,6 +68,8 @@ export default function Invoices() {
   useMemo(() => {
     if (isDirect && !manualInvoiceOpen) {
       const itemsFromUrl = queryParams.get("items");
+      const technicianId = queryParams.get("technicianId");
+      const rollId = queryParams.get("rollId");
       let initialItems = [{ description: "", quantity: 1, unitPrice: 0, type: "service" }];
       
       if (itemsFromUrl) {
@@ -83,6 +87,8 @@ export default function Invoices() {
         vehicleName: queryParams.get("vehicleName") || "",
         plateNumber: queryParams.get("plateNumber") || "",
         items: initialItems,
+        technicianId: technicianId || "",
+        rollId: rollId || "",
       });
       setManualInvoiceOpen(true);
       // Clean up URL
@@ -100,6 +106,14 @@ export default function Invoices() {
     onError: (error: any) => {
       toast({ title: error.message || "Failed to generate invoice", variant: "destructive" });
     }
+  });
+
+  const { data: technicians = [] } = useQuery<any[]>({
+    queryKey: ["/api/technicians"],
+  });
+
+  const { data: rolls = [] } = useQuery<any[]>({
+    queryKey: ["/api/inventory/rolls"],
   });
 
   const handleManualInvoiceSubmit = () => {
@@ -648,7 +662,42 @@ export default function Invoices() {
 
           <Separator className="my-4" />
           
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Technician</Label>
+            <Select
+              value={manualInvoiceData.technicianId}
+              onValueChange={(val) => setManualInvoiceData({ ...manualInvoiceData, technicianId: val })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select technician" />
+              </SelectTrigger>
+              <SelectContent>
+                {technicians.map((tech: any) => (
+                  <SelectItem key={tech._id} value={tech._id}>{tech.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>PPF Roll</Label>
+            <Select
+              value={manualInvoiceData.rollId}
+              onValueChange={(val) => setManualInvoiceData({ ...manualInvoiceData, rollId: val })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select roll" />
+              </SelectTrigger>
+              <SelectContent>
+                {rolls.map((roll: any) => (
+                  <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>{roll.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Items & Services</h3>
               <Button type="button" variant="outline" size="sm" onClick={addManualItem}>Add Item</Button>

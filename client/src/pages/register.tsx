@@ -431,7 +431,25 @@ export default function CustomerRegistration() {
     }>,
     tempServiceName: "",
     tempServiceVehicleType: "",
+    technicianId: "",
+    rollId: "",
   });
+
+  const { data: technicians = [] } = useQuery<any[]>({
+    queryKey: ["/api/technicians"],
+  });
+
+  const selectedPpfInventory = useMemo(() => {
+    if (!customerData.ppfCategory) return null;
+    return inventory.find(item => 
+      item.isPpf && (item.category === customerData.ppfCategory || item.name === customerData.ppfCategory)
+    );
+  }, [inventory, customerData.ppfCategory]);
+
+  const availableRolls = useMemo(() => {
+    if (!selectedPpfInventory) return [];
+    return (selectedPpfInventory.rolls || []).filter((r: any) => r.status !== 'Finished');
+  }, [selectedPpfInventory]);
 
   const { data: customersData } = useQuery({
     queryKey: ["customers"],
@@ -726,7 +744,10 @@ export default function CustomerRegistration() {
 
       // Pass via URL parameters
       const itemsParam = encodeURIComponent(JSON.stringify(items));
-      setLocation(`/invoices?direct=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}`);
+      const technicianParam = customerData.technicianId ? `&technicianId=${customerData.technicianId}` : "";
+      const rollParam = customerData.rollId ? `&rollId=${customerData.rollId}` : "";
+      
+      setLocation(`/invoices?direct=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}${technicianParam}${rollParam}`);
       return;
     }
 
@@ -932,29 +953,72 @@ export default function CustomerRegistration() {
             data-testid="card-customer-info"
           >
             <CardHeader className="pb-6 border-b border-slate-200 bg-gradient-to-r from-primary/5 to-transparent">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
-                  <User className="w-5 h-5 text-primary" />
-                  Customer Information
-                </CardTitle>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
-                    <Label htmlFor="invoice-direct" className="text-xs font-semibold text-slate-600">Create Invoice Directly</Label>
-                    <input
-                      type="checkbox"
-                      id="invoice-direct"
-                      checked={isInvoiceDirect}
-                      onChange={(e) => setIsInvoiceDirect(e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
-                    />
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-3 text-lg text-slate-900 font-semibold">
+                    <User className="w-5 h-5 text-primary" />
+                    Customer Information
+                  </CardTitle>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                      <input
+                        type="checkbox"
+                        id="invoice-direct"
+                        checked={isInvoiceDirect}
+                        onChange={(e) => setIsInvoiceDirect(e.target.checked)}
+                        className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                      />
+                      <Label htmlFor="invoice-direct" className="text-xs font-semibold text-slate-600">Create Invoice Directly</Label>
+                    </div>
                   </div>
                 </div>
-              </div>
               <p className="text-sm text-slate-600 mt-2">
                 Provide your personal details and service preferences
               </p>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
+              {isInvoiceDirect && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/30 mb-6">
+                  <div className="space-y-2">
+                    <Label>Select Technician</Label>
+                    <Select
+                      value={customerData.technicianId}
+                      onValueChange={(val) => setCustomerData({ ...customerData, technicianId: val })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select technician" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {technicians.map((tech: any) => (
+                          <SelectItem key={tech._id} value={tech._id}>
+                            {tech.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {customerData.ppfCategory && (
+                    <div className="space-y-2">
+                      <Label>Select PPF Roll</Label>
+                      <Select
+                        value={customerData.rollId}
+                        onValueChange={(val) => setCustomerData({ ...customerData, rollId: val })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select PPF roll" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableRolls.map((roll: any) => (
+                            <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
+                              {roll.name} ({roll.remaining_sqft || roll.remainingSqft} sqft left)
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-6 relative">
                   <Label>Full Name *</Label>
@@ -2317,7 +2381,7 @@ export default function CustomerRegistration() {
                 >
                   {createCustomerMutation.isPending
                     ? "Registering..."
-                    : "Complete Registration"}
+                    : isInvoiceDirect ? "Create Invoice" : "Complete Registration"}
                   <Check className="w-4 h-4 ml-2" />
                 </Button>
               </div>
