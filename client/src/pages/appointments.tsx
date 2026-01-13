@@ -11,7 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Trash2, List, AlertCircle, X, ChevronUp, ChevronDown, Clock } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, Trash2, List, AlertCircle, X, ChevronUp, ChevronDown, Clock, MoreVertical, Check, CalendarDays, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -414,34 +420,38 @@ export default function Appointments() {
                     <td className="px-4 py-3 text-sm text-right">
                       <div className="flex gap-2 justify-end">
                         {appt.status === 'Scheduled' && (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="h-8 text-xs" 
-                              onClick={() => {
-                                setRescheduleData(appt);
-                                setRescheduleTime(appt.time);
-                              }}
-                            >
-                              Reschedule
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="h-8 text-xs text-orange-600 hover:text-orange-700" 
-                              onClick={() => setCancelData({ id: appt._id })}
-                            >
-                              Cancel
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              className="h-8 text-xs" 
-                              onClick={() => updateStatusMutation.mutate({ id: appt._id, status: 'Done' })}
-                            >
-                              Mark Done
-                            </Button>
-                          </>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-8">
+                                <MoreVertical className="w-4 h-4 mr-1" />
+                                Options
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  setRescheduleData(appt);
+                                  setRescheduleTime(appt.time);
+                                }}
+                              >
+                                <CalendarDays className="w-4 h-4 mr-2" />
+                                Reschedule
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-orange-600 focus:text-orange-700"
+                                onClick={() => setCancelData({ id: appt._id })}
+                              >
+                                <XCircle className="w-4 h-4 mr-2" />
+                                Cancel
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => updateStatusMutation.mutate({ id: appt._id, status: 'Done' })}
+                              >
+                                <Check className="w-4 h-4 mr-2" />
+                                Mark Done
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
                         <Button 
                           size="icon" 
