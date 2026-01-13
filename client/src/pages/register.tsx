@@ -690,32 +690,20 @@ export default function CustomerRegistration() {
   };
 
   const ppfCategoriesFromInventory = useMemo(() => {
-    // Collect all items that are either marked as isPpf or have 'ppf' in their category name
-    const ppfItems = (inventory || []).filter(
-      (item: any) =>
-        item && (item.isPpf === true ||
-        (item.category && item.category.toString().toLowerCase().includes("ppf"))),
-    );
-    
-    // In the Inventory screen shown in the image, "Elite", "Garware Matt", etc. 
-    // are displayed as the primary identifiers (likely the 'name' of the inventory item).
-    const uniqueNames = Array.from(new Set(ppfItems.map((i: any) => i.name))).filter(Boolean);
-    
-    return uniqueNames.map((name) => {
-      const item = ppfItems.find((i: any) => i.name === name);
+    return dbPpfCategories.map((cat: any) => {
       // Map warranty options from services based on matching name
-      const serviceMatch = (dbServices || []).find((s: any) => 
-        s && s.name && s.name.toLowerCase().trim() === name.toLowerCase().trim()
+      const serviceMatch = dbServices.find((s: any) => 
+        s.name.toLowerCase().trim() === cat.name.toLowerCase().trim()
       );
       
       return {
-        _id: item?._id || item?.id || Math.random().toString(),
-        name: name,
+        _id: cat._id || cat.id || Math.random().toString(),
+        name: cat.name,
         isPpf: true,
         warrantyOptions: serviceMatch?.warrantyOptions || {},
       };
     });
-  }, [inventory, dbServices]);
+  }, [dbPpfCategories, dbServices]);
 
   const selectedRollData = useMemo(() => {
     return allRolls.find(r => (r._id || r.name) === customerData.rollId);
