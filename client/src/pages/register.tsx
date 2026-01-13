@@ -439,18 +439,6 @@ export default function CustomerRegistration() {
     queryKey: ["/api/technicians"],
   });
 
-  const selectedPpfInventory = useMemo(() => {
-    if (!customerData.ppfCategory) return null;
-    return inventory.find(item => 
-      item.isPpf && (item.category === customerData.ppfCategory || item.name === customerData.ppfCategory)
-    );
-  }, [inventory, customerData.ppfCategory]);
-
-  const availableRolls = useMemo(() => {
-    if (!selectedPpfInventory) return [];
-    return (selectedPpfInventory.rolls || []).filter((r: any) => r.status !== 'Finished');
-  }, [selectedPpfInventory]);
-
   const { data: customersData } = useQuery({
     queryKey: ["customers"],
     queryFn: () => api.customers.list({ page: 1, limit: 1000 }),
@@ -533,19 +521,31 @@ export default function CustomerRegistration() {
 
   const [vehicleImagePreview, setVehicleImagePreview] = useState<string>("");
 
-  const { data: inventory = [] } = useQuery<any[]>({
-    queryKey: ["inventory"],
-    queryFn: api.inventory.list,
+  const { data: dbServices = [], refetch: refetchServices } = useQuery<any[]>({
+    queryKey: ["/api/services"],
+    staleTime: 0, // Ensure we get fresh data
   });
 
   const { data: dbPpfCategories = [] } = useQuery<any[]>({
     queryKey: ["/api/ppf-categories"],
   });
 
-  const { data: dbServices = [], refetch: refetchServices } = useQuery<any[]>({
-    queryKey: ["/api/services"],
-    staleTime: 0, // Ensure we get fresh data
+  const { data: inventory = [] } = useQuery<any[]>({
+    queryKey: ["inventory"],
+    queryFn: api.inventory.list,
   });
+
+  const selectedPpfInventory = useMemo(() => {
+    if (!customerData.ppfCategory) return null;
+    return inventory.find(item => 
+      item.isPpf && (item.category === customerData.ppfCategory || item.name === customerData.ppfCategory)
+    );
+  }, [inventory, customerData.ppfCategory]);
+
+  const availableRolls = useMemo(() => {
+    if (!selectedPpfInventory) return [];
+    return (selectedPpfInventory.rolls || []).filter((r: any) => r.status !== 'Finished');
+  }, [selectedPpfInventory]);
 
   const [isAddingService, setIsAddingService] = useState(false);
   const [newService, setNewService] = useState({
