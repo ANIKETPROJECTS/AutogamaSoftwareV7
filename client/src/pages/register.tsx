@@ -690,10 +690,19 @@ export default function CustomerRegistration() {
   };
 
   const ppfCategoriesFromInventory = useMemo(() => {
+    console.log("DEBUG: Computing ppfCategoriesFromInventory", { 
+      inventoryLength: inventory.length, 
+      dbPpfCategoriesLength: dbPpfCategories.length 
+    });
+
     // Get unique categories from inventory items that are marked as isPpf
     const categoriesFromInventory = Array.from(new Set(inventory
-      .filter(item => item.isPpf)
-      .map(item => item.category)
+      .filter(item => {
+        const isPpf = item.isPpf === true || item.isPpf === 'true' || (item.category && item.category.toLowerCase().includes('ppf'));
+        if (isPpf) console.log("DEBUG: Found PPF item in inventory", item.name, item.category);
+        return isPpf;
+      })
+      .map(item => item.category || item.name)
     )).filter(Boolean);
 
     // Also include any categories from the database categories collection
@@ -701,6 +710,7 @@ export default function CustomerRegistration() {
     
     // Combine both and remove duplicates
     const allCategoryNames = Array.from(new Set([...categoriesFromInventory, ...databaseCategoryNames]));
+    console.log("DEBUG: All PPF Category Names", allCategoryNames);
 
     return allCategoryNames.map((name: any) => {
       // Map warranty options from services based on matching name
@@ -708,14 +718,46 @@ export default function CustomerRegistration() {
         s.name.toLowerCase().trim() === name.toString().toLowerCase().trim()
       );
       
+      const categoryInventory = inventory.find(item => {
+        const isPpf = item.isPpf === true || item.isPpf === 'true' || (item.category && item.category.toLowerCase().includes('ppf'));
+        const catMatch = (item.category || item.name) === name;
+        return isPpf && catMatch;
+      });
+
       return {
         _id: name,
         name: name,
         isPpf: true,
         warrantyOptions: serviceMatch?.warrantyOptions || {},
+        hasRolls: !!(categoryInventory?.rolls && categoryInventory.rolls.length > 0)
       };
     });
   }, [inventory, dbPpfCategories, dbServices]);
+
+  const selectedPpfProducts = useMemo(() => {
+    console.log("DEBUG: Computing selectedPpfProducts", { 
+      ppfCategory: customerData.ppfCategory,
+      inventoryLength: inventory.length 
+    });
+    if (!customerData.ppfCategory) return [];
+    
+    const items = inventory.filter(item => {
+      const isPpf = item.isPpf === true || item.isPpf === 'true' || (item.category && item.category.toLowerCase().includes('ppf'));
+      const catMatch = (item.category || item.name) === customerData.ppfCategory;
+      return isPpf && catMatch;
+    });
+
+    console.log("DEBUG: Found matching inventory items for category", customerData.ppfCategory, items);
+
+    const rolls = items.flatMap(item => (item.rolls || []).map((roll: any) => ({
+      ...roll,
+      inventoryName: item.name,
+      inventoryId: item._id
+    })));
+
+    console.log("DEBUG: Resulting selectedPpfProducts", rolls);
+    return rolls;
+  }, [inventory, customerData.ppfCategory]);
 
   const selectedRollData = useMemo(() => {
     return allRolls.find(r => (r._id || r.name) === customerData.rollId);
@@ -1280,7 +1322,10 @@ export default function CustomerRegistration() {
                                 <div className="space-y-2">
                                   <Select
                                     value={customerData.rollId}
-                                    onValueChange={(val) => setManualRollId(val)}
+                                    onValueChange={(val) => {
+                                      console.log("DEBUG: Roll selected", val);
+                                      setManualRollId(val);
+                                    }}
                                   >
                                     <SelectTrigger className="bg-white border-primary/20 h-10">
                                       <SelectValue placeholder="Choose a product" />
@@ -1311,15 +1356,15 @@ export default function CustomerRegistration() {
                                           onKeyDown={(e) => e.stopPropagation()}
                                         />
                                       </div>
-                                      {allRolls.length > 0 ? (
-                                        allRolls.map((roll: any) => (
+                                      {selectedPpfProducts.length > 0 ? (
+                                        selectedPpfProducts.map((roll: any) => (
                                           <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
-                                            {roll.inventoryName} - {roll.name}
+                                            {roll.inventoryName} - {roll.name} ({(roll.remaining_sqft || roll.remainingSqft || 0).toFixed(2)} sqft)
                                           </SelectItem>
                                         ))
                                       ) : (
                                         <SelectItem value="none" disabled>
-                                          No rolls available
+                                          {customerData.ppfCategory ? `No rolls available for ${customerData.ppfCategory}` : "Please select a category below first"}
                                         </SelectItem>
                                       )}
                                     </SelectContent>
