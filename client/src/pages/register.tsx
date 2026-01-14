@@ -690,20 +690,32 @@ export default function CustomerRegistration() {
   };
 
   const ppfCategoriesFromInventory = useMemo(() => {
-    return dbPpfCategories.map((cat: any) => {
+    // Get unique categories from inventory items that are marked as isPpf
+    const categoriesFromInventory = Array.from(new Set(inventory
+      .filter(item => item.isPpf)
+      .map(item => item.category)
+    )).filter(Boolean);
+
+    // Also include any categories from the database categories collection
+    const databaseCategoryNames = dbPpfCategories.map((cat: any) => cat.name);
+    
+    // Combine both and remove duplicates
+    const allCategoryNames = Array.from(new Set([...categoriesFromInventory, ...databaseCategoryNames]));
+
+    return allCategoryNames.map((name: any) => {
       // Map warranty options from services based on matching name
       const serviceMatch = dbServices.find((s: any) => 
-        s.name.toLowerCase().trim() === cat.name.toLowerCase().trim()
+        s.name.toLowerCase().trim() === name.toString().toLowerCase().trim()
       );
       
       return {
-        _id: cat._id || cat.id || Math.random().toString(),
-        name: cat.name,
+        _id: name,
+        name: name,
         isPpf: true,
         warrantyOptions: serviceMatch?.warrantyOptions || {},
       };
     });
-  }, [dbPpfCategories, dbServices]);
+  }, [inventory, dbPpfCategories, dbServices]);
 
   const selectedRollData = useMemo(() => {
     return allRolls.find(r => (r._id || r.name) === customerData.rollId);
