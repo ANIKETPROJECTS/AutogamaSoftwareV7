@@ -46,3 +46,8 @@ waitForPort = 5000
 [agent]
 mockupState = "FULLSTACK"
 expertMode = true
+
+[userenv]
+
+[userenv.shared]
+MONGODB_URI = "mongodb+srv://abhijeet18012001_db_user:SNXS0nh4tm8l2IYv@autogarage.pxrxaer.mongodb.net/?appName=Autogarage"
