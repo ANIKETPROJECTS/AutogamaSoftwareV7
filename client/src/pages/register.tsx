@@ -2589,7 +2589,7 @@ export default function CustomerRegistration() {
                         type="number"
                         value={customerData.discount}
                         onChange={(e) => setCustomerData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
-                        className="h-9 w-24 bg-white"
+                        className="h-9 w-24 bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                     <div className="space-y-1">
@@ -2598,7 +2598,7 @@ export default function CustomerRegistration() {
                         type="number"
                         value={customerData.taxPercentage}
                         onChange={(e) => setCustomerData(prev => ({ ...prev, taxPercentage: parseFloat(e.target.value) || 0 }))}
-                        className="h-9 w-20 bg-white"
+                        className="h-9 w-20 bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                   </div>
