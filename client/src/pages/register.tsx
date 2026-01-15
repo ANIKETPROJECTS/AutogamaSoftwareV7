@@ -759,8 +759,15 @@ export default function CustomerRegistration() {
 
   const categoryStock = useMemo(() => {
     if (!customerData.ppfCategory) return 0;
-    return selectedPpfProducts.reduce((acc, roll) => acc + (roll.remaining_sqft || roll.remainingSqft || 0), 0);
-  }, [selectedPpfProducts, customerData.ppfCategory]);
+    const totalInventory = selectedPpfProducts.reduce((acc, roll) => acc + (roll.remaining_sqft || roll.remainingSqft || 0), 0);
+    
+    // Subtract already added quantities for this category from the available stock
+    const alreadyAdded = customerData.selectedOtherServices
+      .filter(s => s.vehicleType === "PPF" && s.name === `PPF: ${customerData.ppfCategory}`)
+      .reduce((acc, s) => acc + s.price, 0);
+      
+    return Math.max(0, totalInventory - alreadyAdded);
+  }, [selectedPpfProducts, customerData.ppfCategory, customerData.selectedOtherServices]);
 
   const selectedRollData = useMemo(() => {
     return allRolls.find(r => (r._id || r.name) === customerData.rollId);
