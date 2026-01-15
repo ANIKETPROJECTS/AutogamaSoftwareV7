@@ -694,8 +694,7 @@ export default function CustomerRegistration() {
     }
   };
 
-  const ppfCategoriesFromServices = useMemo(() => {
-    // Show all PPF categories from inventory as they have the rolls
+  const ppfInventoryCategories = useMemo(() => {
     const ppfInventory = inventory.filter(item => 
       item.isPpf === true || 
       item.isPpf === 'true' || 
@@ -703,35 +702,31 @@ export default function CustomerRegistration() {
       (item.name && item.name.toLowerCase().includes('ppf'))
     );
     
-    // Get unique categories/names from inventory
     const categoriesSet = new Set<string>();
     ppfInventory.forEach(item => {
       if (item.category) categoriesSet.add(item.category);
-      if (item.name) categoriesSet.add(item.name);
+      else if (item.name) categoriesSet.add(item.name);
     });
     
-    // Also include categories from dbServices if they are missing
-    dbServices.forEach(s => {
-      if (s.isPpf && s.name) {
-        categoriesSet.add(s.name);
-      }
-    });
-
-    const categories = Array.from(categoriesSet).sort();
-
-    return categories.map(catName => {
-      const service = dbServices.find(s => s.name === catName && s.isPpf);
-      const inventoryItem = inventory.find(item => (item.category || item.name) === catName);
-
+    return Array.from(categoriesSet).sort().map(cat => {
+      const inventoryItem = inventory.find(i => (i.category || i.name) === cat);
       return {
-        _id: service?._id || catName,
-        name: catName,
-        isPpf: true,
-        warrantyOptions: service?.warrantyOptions || {},
+        name: cat,
         hasRolls: !!(inventoryItem?.rolls && inventoryItem.rolls.length > 0)
       };
     });
-  }, [dbServices, inventory]);
+  }, [inventory]);
+
+  const ppfCategoriesFromServices = useMemo(() => {
+    return dbServices
+      .filter(s => s.isPpf)
+      .map(service => ({
+        _id: service._id,
+        name: service.name,
+        isPpf: true,
+        warrantyOptions: service.warrantyOptions || {}
+      }));
+  }, [dbServices]);
 
   const selectedPpfProducts = useMemo(() => {
     if (!customerData.ppfCategory) return [];
@@ -1377,10 +1372,10 @@ export default function CustomerRegistration() {
                                           onKeyDown={(e) => e.stopPropagation()}
                                         />
                                       </div>
-                                      {ppfCategoriesFromServices.length > 0 ? (
-                                        ppfCategoriesFromServices.map((cat: any) => (
+                                      {ppfInventoryCategories.length > 0 ? (
+                                        ppfInventoryCategories.map((cat: any) => (
                                           <SelectItem key={cat.name} value={cat.name}>
-                                            {cat.name}
+                                            {cat.name} {cat.hasRolls ? "(In Stock)" : "(No Rolls)"}
                                           </SelectItem>
                                         ))
                                       ) : (
