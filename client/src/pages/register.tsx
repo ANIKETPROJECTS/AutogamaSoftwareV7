@@ -2581,6 +2581,28 @@ export default function CustomerRegistration() {
                 >
                   Previous
                 </Button>
+                {isInvoiceDirect && (
+                  <div className="flex gap-4 items-end">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-500">Discount (₹)</Label>
+                      <Input
+                        type="number"
+                        value={customerData.discount}
+                        onChange={(e) => setCustomerData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
+                        className="h-9 w-24 bg-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-500">GST (%)</Label>
+                      <Input
+                        type="number"
+                        value={customerData.taxPercentage}
+                        onChange={(e) => setCustomerData(prev => ({ ...prev, taxPercentage: parseFloat(e.target.value) || 0 }))}
+                        className="h-9 w-20 bg-white"
+                      />
+                    </div>
+                  </div>
+                )}
                 <Button
                   onClick={handleSubmit}
                   disabled={
