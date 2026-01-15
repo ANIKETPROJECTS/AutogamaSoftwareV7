@@ -394,7 +394,15 @@ export default function Invoices() {
     const calculatedGST = Math.max(0, calculatedGrandTotal - calculatedSubtotal);
 
     const gstAmount = invoice.tax || 0;
-    const gstLabel = gstAmount > 0 ? "With GST" : "NON GST";
+    const isGST = gstAmount > 0;
+    console.log("GST Calculation Debug:", {
+      invoiceNumber: invoice.invoiceNumber,
+      tax: invoice.tax,
+      calculatedGST,
+      gstAmount,
+      isGST
+    });
+    const gstLabel = isGST ? "With GST" : "NON GST";
 
     const logoHtml = `<div style="text-align: center; width: 100%; min-height: 80px; margin-bottom: 10px;">
       <img src="${logoUrl}" 
