@@ -389,8 +389,12 @@ export default function Invoices() {
     // Use absolute paths for the images to ensure they load correctly in all contexts
     const logoUrl = `/${currentLogo}`;
     console.log("Logo selected:", { currentLogo, logoUrl, isBusiness2 });
-    const gstAmount = (invoice.taxAmount || 0);
-    const gstLabel = gstAmount > 0 ? "With GST" : "NON GST";
+    const calculatedSubtotal = invoice.items.reduce((sum: number, item: any) => sum + ((item.unitPrice * (item.quantity || 1)) - (item.discount || 0)), 0);
+    const calculatedGrandTotal = (invoice.totalAmount || (calculatedSubtotal + (invoice.taxAmount || 0) - (invoice.discount || 0)));
+    const calculatedGST = Math.max(0, calculatedGrandTotal - calculatedSubtotal);
+
+    const gstAmount = calculatedGST;
+    const gstLabel = gstAmount > 0.01 ? "With GST" : "NON GST";
 
     const logoHtml = `<div style="text-align: center; width: 100%; min-height: 80px; margin-bottom: 10px;">
       <img src="${logoUrl}" 
@@ -399,11 +403,7 @@ export default function Invoices() {
       <p style="color: #6b7280; font-size: 14px; font-weight: 600; margin: 8px 0 0 0; text-transform: uppercase;">${gstLabel}</p>
     </div>`;
 
-            const calculatedSubtotal = invoice.items.reduce((sum: number, item: any) => sum + ((item.unitPrice * (item.quantity || 1)) - (item.discount || 0)), 0);
-            const calculatedGrandTotal = (invoice.totalAmount || (calculatedSubtotal + (invoice.taxAmount || 0) - (invoice.discount || 0)));
-            const calculatedGST = Math.max(0, calculatedGrandTotal - calculatedSubtotal);
-
-            return `
+    return `
       <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 0;">
         <div style="text-align: center; margin-bottom: 30px;">
           ${logoHtml}
