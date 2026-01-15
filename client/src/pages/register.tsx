@@ -1047,25 +1047,6 @@ export default function CustomerRegistration() {
                     Customer Information
                   </CardTitle>
                   <div className="flex items-center space-x-2">
-                    {isInvoiceDirect && (
-                      <div className="mr-2">
-                        <Select
-                          value={customerData.technicianId}
-                          onValueChange={(val) => setCustomerData(prev => ({ ...prev, technicianId: val }))}
-                        >
-                          <SelectTrigger className="bg-white border-slate-300 h-8 w-[150px]">
-                            <SelectValue placeholder="Technician" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {technicians.map((tech: any) => (
-                              <SelectItem key={tech._id || tech.id} value={tech._id || tech.id}>
-                                {tech.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
                     <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
                       <input
                         type="checkbox"
@@ -2307,7 +2288,27 @@ export default function CustomerRegistration() {
 
                 {isInvoiceDirect && (
                   <div className="md:col-span-2 space-y-4 pt-4 border-t border-slate-100">
-                    <h4 className="font-semibold text-sm text-slate-900">Direct Invoice Details</h4>
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-sm text-slate-900">Direct Invoice Details</h4>
+                      <div className="w-[200px]">
+                        <Label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Technician</Label>
+                        <Select
+                          value={customerData.technicianId}
+                          onValueChange={(val) => setCustomerData(prev => ({ ...prev, technicianId: val }))}
+                        >
+                          <SelectTrigger className="bg-white border-slate-300 h-9 w-full">
+                            <SelectValue placeholder="Select Technician" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {technicians.map((tech: any) => (
+                              <SelectItem key={tech._id || tech.id} value={tech._id || tech.id}>
+                                {tech.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Labor Charge (₹)</Label>
