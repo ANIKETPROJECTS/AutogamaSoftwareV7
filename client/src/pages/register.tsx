@@ -1346,8 +1346,8 @@ export default function CustomerRegistration() {
                                           onKeyDown={(e) => e.stopPropagation()}
                                         />
                                       </div>
-                                      {ppfCategoriesFromInventory.length > 0 ? (
-                                        ppfCategoriesFromInventory.map((cat: any) => (
+                                      {ppfCategoriesFromServices.length > 0 ? (
+                                        ppfCategoriesFromServices.map((cat: any) => (
                                           <SelectItem key={cat.name} value={cat.name}>
                                             {cat.name}
                                           </SelectItem>
@@ -1471,8 +1471,8 @@ export default function CustomerRegistration() {
                                   onKeyDown={(e) => e.stopPropagation()}
                                 />
                               </div>
-                              {ppfCategoriesFromInventory.length > 0 ? (
-                                ppfCategoriesFromInventory.map((cat: any) => (
+                              {ppfCategoriesFromServices.length > 0 ? (
+                                ppfCategoriesFromServices.map((cat: any) => (
                                   <SelectItem key={cat._id} value={cat.name}>
                                     {cat.name}
                                   </SelectItem>
@@ -1534,7 +1534,7 @@ export default function CustomerRegistration() {
                                   />
                                 </div>
                                 {(() => {
-                                  const selectedCat = ppfCategoriesFromInventory.find(c => c.name === customerData.ppfCategory);
+                                  const selectedCat = ppfCategoriesFromServices.find(c => c.name === customerData.ppfCategory);
                                   const options = selectedCat?.warrantyOptions || {};
                                   return Object.keys(options).map((type) => (
                                     <SelectItem key={type} value={type}>
@@ -1553,7 +1553,7 @@ export default function CustomerRegistration() {
                             <Select
                               value={customerData.ppfWarranty}
                               onValueChange={(value) => {
-                                const selectedCat = ppfCategoriesFromInventory.find(c => c.name === customerData.ppfCategory);
+                                const selectedCat = ppfCategoriesFromServices.find(c => c.name === customerData.ppfCategory);
                                 const vehicleOptions = selectedCat?.warrantyOptions?.[customerData.ppfVehicleType] || [];
                                 const option = vehicleOptions.find((o: any) => o.warranty === value);
                                 const price = option?.price || 0;
@@ -1598,7 +1598,7 @@ export default function CustomerRegistration() {
                                   />
                                 </div>
                                 {(() => {
-                                  const selectedCat = ppfCategoriesFromInventory.find(c => c.name === customerData.ppfCategory);
+                                  const selectedCat = ppfCategoriesFromServices.find(c => c.name === customerData.ppfCategory);
                                   const vehicleOptions = selectedCat?.warrantyOptions?.[customerData.ppfVehicleType] || [];
                                   return vehicleOptions.map((opt: any) => (
                                     <SelectItem key={opt.warranty} value={opt.warranty}>
