@@ -666,7 +666,7 @@ export default function CustomerRegistration() {
     mutationFn: api.customers.create,
     onSuccess: async (customer) => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-      toast({ title: "Customer registered successfully!" });
+      toast({ title: "Customer processed successfully!" });
       
       if (isInvoiceDirect) {
         // Use the assignments from the dialog

@@ -915,6 +915,18 @@ export async function registerRoutes(
 
   app.post("/api/customers", async (req, res) => {
     try {
+      const { phone } = req.body;
+      const existingCustomer = await Customer.findOne({ phone });
+      
+      if (existingCustomer) {
+        const updatedCustomer = await Customer.findByIdAndUpdate(
+          existingCustomer._id,
+          req.body,
+          { new: true }
+        );
+        return res.json(updatedCustomer);
+      }
+
       const customer = await storage.createCustomer(req.body);
       res.status(201).json(customer);
     } catch (error: any) {
