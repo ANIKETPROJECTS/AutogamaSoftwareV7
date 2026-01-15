@@ -2586,19 +2586,31 @@ export default function CustomerRegistration() {
                     <div className="space-y-1">
                       <Label className="text-[10px] uppercase font-bold text-slate-500">Discount (₹)</Label>
                       <Input
-                        type="number"
-                        value={customerData.discount}
-                        onChange={(e) => setCustomerData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
-                        className="h-9 w-24 bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        type="text"
+                        value={customerData.discount === 0 ? "" : customerData.discount}
+                        onChange={(e) => {
+                          const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                          if (!isNaN(val as number)) {
+                            setCustomerData(prev => ({ ...prev, discount: val as number }));
+                          }
+                        }}
+                        placeholder="0"
+                        className="h-9 w-24 bg-white"
                       />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] uppercase font-bold text-slate-500">GST (%)</Label>
                       <Input
-                        type="number"
-                        value={customerData.taxPercentage}
-                        onChange={(e) => setCustomerData(prev => ({ ...prev, taxPercentage: parseFloat(e.target.value) || 0 }))}
-                        className="h-9 w-20 bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        type="text"
+                        value={customerData.taxPercentage === 0 ? "" : customerData.taxPercentage}
+                        onChange={(e) => {
+                          const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                          if (!isNaN(val as number)) {
+                            setCustomerData(prev => ({ ...prev, taxPercentage: val as number }));
+                          }
+                        }}
+                        placeholder="0"
+                        className="h-9 w-20 bg-white"
                       />
                     </div>
                   </div>
