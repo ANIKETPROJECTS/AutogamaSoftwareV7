@@ -535,7 +535,7 @@ export default function CustomerRegistration() {
     queryKey: ["/api/ppf-categories"],
   });
 
-  const { data: inventory = [] } = useQuery<any[]>({
+  const { data: inventory = [], refetch: refetchInventory } = useQuery<any[]>({
     queryKey: ["inventory"],
     queryFn: api.inventory.list,
   });
@@ -760,6 +760,12 @@ export default function CustomerRegistration() {
     })));
 
     console.log("DEBUG: Dropdown Fetched Rolls:", rolls);
+    
+    // Additional log for specific drop-down fetched data as requested
+    if (rolls.length > 0) {
+      console.log("SUCCESS: Dropdown data fetched after ticking checkbox:", rolls);
+    }
+    
     return rolls;
   }, [inventory, customerData.ppfCategory]);
 
@@ -1065,8 +1071,8 @@ export default function CustomerRegistration() {
                           const checked = e.target.checked;
                           setIsInvoiceDirect(checked);
                           if (checked) {
-                            // Refetch inventory to ensure the product dropdown has latest data
-                            queryClient.invalidateQueries({ queryKey: ["inventory"] });
+                            // Explicitly refetch inventory when checkbox is ticked
+                            refetchInventory();
                           }
                         }}
                         className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
@@ -1334,7 +1340,7 @@ export default function CustomerRegistration() {
                                   <Select
                                     value={customerData.rollId}
                                     onValueChange={(val) => {
-                                      console.log("DEBUG: Roll selected", val);
+                                      console.log("DEBUG: Roll selected manually", val);
                                       setManualRollId(val);
                                     }}
                                   >
@@ -1374,9 +1380,9 @@ export default function CustomerRegistration() {
                                           </SelectItem>
                                         ))
                                       ) : (
-                                        <SelectItem value="none" disabled>
+                                        <div className="p-4 text-center text-sm text-slate-500">
                                           {customerData.ppfCategory ? `No rolls available for ${customerData.ppfCategory}` : "Please select a category below first"}
-                                        </SelectItem>
+                                        </div>
                                       )}
                                     </SelectContent>
                                   </Select>
