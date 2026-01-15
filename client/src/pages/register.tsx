@@ -1348,10 +1348,17 @@ export default function CustomerRegistration() {
                               <CardContent className="pt-4 space-y-4">
                                 <div className="space-y-2">
                                   <Select
-                                    value={customerData.rollId}
+                                    value={customerData.ppfCategory}
                                     onValueChange={(val) => {
-                                      console.log("DEBUG: Roll selected manually", val);
-                                      setManualRollId(val);
+                                      console.log("DEBUG: Category selected from product dropdown", val);
+                                      setCustomerData(prev => ({ 
+                                        ...prev, 
+                                        ppfCategory: val,
+                                        ppfVehicleType: "",
+                                        ppfWarranty: "",
+                                        ppfPrice: 0,
+                                        rollId: "" // Reset roll when category changes
+                                      }));
                                     }}
                                   >
                                     <SelectTrigger className="bg-white border-primary/20 h-10">
@@ -1383,15 +1390,15 @@ export default function CustomerRegistration() {
                                           onKeyDown={(e) => e.stopPropagation()}
                                         />
                                       </div>
-                                      {selectedPpfProducts.length > 0 ? (
-                                        selectedPpfProducts.map((roll: any) => (
-                                          <SelectItem key={roll._id || roll.name} value={roll._id || roll.name}>
-                                            {roll.inventoryName} - {roll.name} ({(roll.remaining_sqft || roll.remainingSqft || 0).toFixed(2)} sqft)
+                                      {ppfCategoriesFromInventory.length > 0 ? (
+                                        ppfCategoriesFromInventory.map((cat: any) => (
+                                          <SelectItem key={cat.name} value={cat.name}>
+                                            {cat.name}
                                           </SelectItem>
                                         ))
                                       ) : (
                                         <div className="p-4 text-center text-sm text-slate-500">
-                                          {customerData.ppfCategory ? `No rolls available for ${customerData.ppfCategory}` : "Please select a category below first"}
+                                          No categories available
                                         </div>
                                       )}
                                     </SelectContent>
