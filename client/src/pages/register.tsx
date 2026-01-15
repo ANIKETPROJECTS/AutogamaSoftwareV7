@@ -1429,11 +1429,28 @@ export default function CustomerRegistration() {
                                   className="w-full bg-white text-black border border-black hover:bg-slate-50"
                                   variant="outline"
                                   onClick={() => {
-                                    if (!customerData.rollId || customerData.ppfQuantity <= 0) {
-                                      toast({ title: "Please select a roll and quantity", variant: "destructive" });
+                                    if (!customerData.ppfCategory || customerData.ppfQuantity <= 0) {
+                                      toast({ title: "Please select a category and quantity", variant: "destructive" });
                                       return;
                                     }
-                                    toast({ title: "PPF Item added to invoice" });
+                                    
+                                    // Add to selectedOtherServices just like in service section logic
+                                    // We'll use a special vehicleType "PPF" to distinguish it
+                                    setCustomerData(prev => ({
+                                      ...prev,
+                                      selectedOtherServices: [
+                                        ...prev.selectedOtherServices,
+                                        {
+                                          name: `PPF: ${prev.ppfCategory}`,
+                                          vehicleType: "PPF",
+                                          price: 0, // Price will be handled during invoice generation or based on selected category later
+                                        }
+                                      ],
+                                      // We don't reset ppfCategory here because it's linked to the bottom dropdown
+                                      ppfQuantity: 1
+                                    }));
+                                    
+                                    toast({ title: "PPF Item added to selection" });
                                   }}
                                 >
                                   + Add Item
