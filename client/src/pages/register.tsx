@@ -434,6 +434,8 @@ export default function CustomerRegistration() {
     technicianId: "",
     rollId: "",
     ppfQuantity: 1,
+    discount: 0,
+    taxPercentage: 18,
   });
 
   const setManualRollId = (val: string) => {
@@ -666,7 +668,7 @@ export default function CustomerRegistration() {
         // Redirect to invoice generation for the first vehicle
         // We'll pass the customer and vehicle info via location state or query params
         // Assuming there's a way to handle this on the invoices page
-        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}`);
+        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&discount=${customerData.discount}&tax=${customerData.taxPercentage}`);
       } else {
         setLocation("/registered-customers");
       }
