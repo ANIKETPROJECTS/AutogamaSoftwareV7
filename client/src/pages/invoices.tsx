@@ -114,6 +114,9 @@ export default function Invoices() {
         items: initialItems,
         technicianId: technicianId || "",
         rollId: rollId || "",
+        discount: Number(queryParams.get("discount")) || 0,
+        taxRate: Number(queryParams.get("tax")) || 18,
+        notes: queryParams.get("notes") || "",
       };
 
       setManualInvoiceData(newInvoiceData);

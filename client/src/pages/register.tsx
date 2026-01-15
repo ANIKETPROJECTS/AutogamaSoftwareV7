@@ -669,10 +669,54 @@ export default function CustomerRegistration() {
       toast({ title: "Customer registered successfully!" });
       
       if (isInvoiceDirect) {
+        const items = [];
+        
+        // Add PPF if selected
+        if (customerData.ppfCategory && customerData.ppfPrice > 0) {
+          items.push({
+            description: `PPF: ${customerData.ppfCategory}${customerData.ppfQuantity > 1 ? ` (Quantity: ${customerData.ppfQuantity})` : ""}`,
+            quantity: 1, // The price is already calculated for the total quantity or per unit, but user wants it in description
+            unitPrice: customerData.ppfPrice,
+            type: "ppf"
+          });
+        }
+        
+        // Add Other Services
+        customerData.selectedOtherServices.forEach(s => {
+          items.push({
+            description: s.name,
+            quantity: 1,
+            unitPrice: s.price,
+            type: "service"
+          });
+        });
+        
+        // Add Accessories
+        selectedAccessories.forEach(a => {
+          items.push({
+            description: a.name,
+            quantity: a.quantity,
+            unitPrice: a.price,
+            type: "accessory"
+          });
+        });
+
+        // Add Labor
+        if (customerData.laborCharge > 0) {
+          items.push({
+            description: "Labor Charges",
+            quantity: 1,
+            unitPrice: customerData.laborCharge,
+            type: "service"
+          });
+        }
+
+        const itemsParam = encodeURIComponent(JSON.stringify(items));
+        
         // Redirect to invoice generation for the first vehicle
         // We'll pass the customer and vehicle info via location state or query params
         // Assuming there's a way to handle this on the invoices page
-        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}&invoiceDate=${customerData.invoiceDate}`);
+        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}&invoiceDate=${customerData.invoiceDate}&items=${itemsParam}`);
       } else {
         setLocation("/registered-customers");
       }
