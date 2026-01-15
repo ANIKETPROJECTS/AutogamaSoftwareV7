@@ -793,6 +793,16 @@ export default function CustomerRegistration() {
         });
       });
 
+      // Add labor charge
+      if (customerData.laborCharge > 0) {
+        items.push({
+          name: "Labor Charges",
+          price: customerData.laborCharge,
+          type: 'labor',
+          assignedBusiness: 'Auto Gamma'
+        });
+      }
+
       if (items.length > 0) {
         setServiceAssignments(items);
         setAssignBusinessOpen(true);
@@ -2661,7 +2671,7 @@ export default function CustomerRegistration() {
             </p>
             <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2">
               {serviceAssignments.map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-accent/50">
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-card">
                   <div className="flex-1 mr-4">
                     <p className="font-medium text-sm">{item.name}</p>
                     <p className="text-xs text-muted-foreground">₹{item.price.toLocaleString()}</p>
