@@ -800,8 +800,8 @@ export default function CustomerRegistration() {
     
     // Subtract already added quantities for this category from the available stock
     const alreadyAdded = customerData.selectedOtherServices
-      .filter(s => s.vehicleType === "PPF" && s.name === `PPF: ${customerData.ppfCategory}`)
-      .reduce((acc, s) => acc + s.price, 0);
+      .filter(s => s.vehicleType === "PPF" && s.name.startsWith(`PPF: ${customerData.ppfCategory}`))
+      .reduce((acc, s) => acc + ((s as any).quantity || 0), 0);
       
     return Math.max(0, totalInventory - alreadyAdded);
   }, [selectedPpfProducts, customerData.ppfCategory, customerData.selectedOtherServices]);
@@ -1574,7 +1574,7 @@ export default function CustomerRegistration() {
                                         {
                                           name: `PPF: ${prev.ppfCategory} - ${prev.ppfQuantity} sq ft`,
                                           vehicleType: "PPF",
-                                          price: 0, // Set price to 0 as requested
+                                          price: 0,
                                           quantity: prev.ppfQuantity
                                         }
                                       ],
@@ -2264,7 +2264,7 @@ export default function CustomerRegistration() {
                                   >
                                     {service.vehicleType === "PPF" ? (
                                       <span className="text-sm font-medium">
-                                        {service.name} - {service.price} sq ft
+                                        {service.name}
                                       </span>
                                     ) : (
                                       <span className="text-sm font-medium">
