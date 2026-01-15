@@ -739,6 +739,10 @@ export default function CustomerRegistration() {
       ppfCategory: customerData.ppfCategory,
       inventoryLength: inventory.length 
     });
+    
+    // Log the entire inventory to see what's available
+    console.log("DEBUG: Full Inventory Data:", inventory);
+
     if (!customerData.ppfCategory) return [];
     
     const items = inventory.filter(item => {
@@ -755,7 +759,7 @@ export default function CustomerRegistration() {
       inventoryId: item._id
     })));
 
-    console.log("DEBUG: Resulting selectedPpfProducts", rolls);
+    console.log("DEBUG: Dropdown Fetched Rolls:", rolls);
     return rolls;
   }, [inventory, customerData.ppfCategory]);
 
@@ -1057,7 +1061,14 @@ export default function CustomerRegistration() {
                         type="checkbox"
                         id="invoice-direct"
                         checked={isInvoiceDirect}
-                        onChange={(e) => setIsInvoiceDirect(e.target.checked)}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setIsInvoiceDirect(checked);
+                          if (checked) {
+                            // Refetch inventory to ensure the product dropdown has latest data
+                            queryClient.invalidateQueries({ queryKey: ["inventory"] });
+                          }
+                        }}
                         className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                       />
                       <Label htmlFor="invoice-direct" className="text-xs font-semibold text-slate-600">Create Invoice Directly</Label>
