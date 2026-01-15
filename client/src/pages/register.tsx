@@ -669,54 +669,22 @@ export default function CustomerRegistration() {
       toast({ title: "Customer registered successfully!" });
       
       if (isInvoiceDirect) {
-        const items = [];
-        
-        // Add PPF if selected
-        if (customerData.ppfCategory && customerData.ppfPrice > 0) {
-          items.push({
-            description: `PPF: ${customerData.ppfCategory}${customerData.ppfQuantity > 1 ? ` (Quantity: ${customerData.ppfQuantity})` : ""}`,
-            quantity: 1, // The price is already calculated for the total quantity or per unit, but user wants it in description
-            unitPrice: customerData.ppfPrice,
-            type: "ppf"
-          });
-        }
-        
-        // Add Other Services
-        customerData.selectedOtherServices.forEach(s => {
-          items.push({
-            description: s.name,
-            quantity: 1,
-            unitPrice: s.price,
-            type: "service"
-          });
-        });
-        
-        // Add Accessories
-        selectedAccessories.forEach(a => {
-          items.push({
-            description: a.name,
-            quantity: a.quantity,
-            unitPrice: a.price,
-            type: "accessory"
-          });
-        });
-
-        // Add Labor
-        if (customerData.laborCharge > 0) {
-          items.push({
-            description: "Labor Charges",
-            quantity: 1,
-            unitPrice: customerData.laborCharge,
-            type: "service"
-          });
-        }
+        // Use the assignments from the dialog
+        const items = serviceAssignments.map(item => ({
+          description: item.name,
+          quantity: 1,
+          unitPrice: item.price,
+          type: item.type === 'part' ? 'accessory' : 'service',
+          category: item.type === 'part' ? 'Accessory' : 'Service',
+          assignedBusiness: item.assignedBusiness
+        }));
 
         const itemsParam = encodeURIComponent(JSON.stringify(items));
+        const technicianParam = customerData.technicianId ? `&technicianId=${customerData.technicianId}` : "";
+        const rollParam = customerData.rollId ? `&rollId=${customerData.rollId}` : "";
         
-        // Redirect to invoice generation for the first vehicle
-        // We'll pass the customer and vehicle info via location state or query params
-        // Assuming there's a way to handle this on the invoices page
-        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}&invoiceDate=${customerData.invoiceDate}&items=${itemsParam}`);
+        // Redirect to invoice generation
+        setLocation(`/invoices?direct=true&autoSubmit=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}${technicianParam}${rollParam}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}&invoiceDate=${customerData.invoiceDate}`);
       } else {
         setLocation("/registered-customers");
       }
@@ -980,23 +948,70 @@ export default function CustomerRegistration() {
   };
 
   const confirmCompleteRegistration = () => {
-    // Collect all items from assignments
-    const items = serviceAssignments.map(item => ({
-      description: item.name,
-      quantity: 1,
-      unitPrice: item.price,
-      type: item.type === 'part' ? 'accessory' : 'service',
-      category: item.type === 'part' ? 'Accessory' : 'Service',
-      assignedBusiness: item.assignedBusiness
-    }));
+    const selectedService = customerData.ppfCategory
+      ? `${customerData.ppfCategory} - ${customerData.ppfWarranty}`
+      : "";
 
-    // Pass via URL parameters
-    const itemsParam = encodeURIComponent(JSON.stringify(items));
-    const technicianParam = customerData.technicianId ? `&technicianId=${customerData.technicianId}` : "";
-    const rollParam = customerData.rollId ? `&rollId=${customerData.rollId}` : "";
-    
+    // Calculate total service cost
+    let totalServiceCost = 0;
+    if (customerData.ppfPrice > 0) {
+      totalServiceCost += customerData.ppfPrice;
+    }
+    customerData.selectedOtherServices.forEach((service) => {
+      if (service.price > 0) {
+        totalServiceCost += service.price;
+      }
+    });
+
+    const otherServicesStr =
+      customerData.selectedOtherServices.length > 0
+        ? customerData.selectedOtherServices.map((s) => s.name).join(", ")
+        : "";
+
+    const servicesList =
+      [selectedService, otherServicesStr].filter(Boolean).join(" + ") ||
+      undefined;
+
+    createCustomerMutation.mutate({
+      name: customerData.name,
+      phone: customerData.phone,
+      email: customerData.email || undefined,
+      address: customerData.address,
+      city: customerData.city,
+      district: customerData.district,
+      state: customerData.state,
+      service: servicesList,
+      serviceCost: totalServiceCost,
+      referralSource: customerData.referralSource || undefined,
+      referrerName: customerData.referrerName || undefined,
+      referrerPhone: customerData.referrerPhone || undefined,
+      registrationDate: customerData.registrationDate,
+      vehicles: [
+        {
+          make:
+            vehicleData.make === "Other"
+              ? vehicleData.otherMake
+              : vehicleData.make,
+          model:
+            vehicleData.make === "Other" || vehicleData.model === "Other"
+              ? vehicleData.otherModel
+              : vehicleData.model,
+          year: vehicleData.year,
+          plateNumber: vehicleData.plateNumber,
+          color: vehicleData.color,
+          vin: vehicleData.chassisNumber,
+          image: vehicleData.image,
+          ppfCategory: customerData.ppfCategory,
+          ppfVehicleType: customerData.ppfVehicleType,
+          ppfWarranty: customerData.ppfWarranty,
+          ppfPrice: customerData.ppfPrice,
+          laborCost: 0,
+          otherServices: customerData.selectedOtherServices,
+          accessories: selectedAccessories,
+        },
+      ],
+    });
     setAssignBusinessOpen(false);
-    setLocation(`/invoices?direct=true&autoSubmit=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}${technicianParam}${rollParam}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}`);
   };
 
   const validateStep1 = async () => {
