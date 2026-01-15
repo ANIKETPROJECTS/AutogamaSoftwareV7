@@ -755,66 +755,49 @@ export default function CustomerRegistration() {
     return allRolls.find(r => (r._id || r.name) === customerData.rollId);
   }, [allRolls, customerData.rollId]);
 
+  const [assignBusinessOpen, setAssignBusinessOpen] = useState(false);
+  const [serviceAssignments, setServiceAssignments] = useState<any[]>([]);
+
   const handleSubmit = () => {
     if (isInvoiceDirect) {
       // Calculate selected services and accessories for auto-fill
       const items = [];
       
-    // Add PPF if selected
-    if (customerData.ppfCategory && customerData.ppfPrice > 0) {
-      items.push({
-        description: `${customerData.ppfCategory} - ${customerData.ppfWarranty}`,
-        quantity: 1,
-        unitPrice: customerData.ppfPrice,
-        type: "service",
-        category: "PPF",
-      });
-    }
-
-    // Add Roll Item if selected
-    if (customerData.rollId && customerData.ppfQuantity > 0) {
-      const roll = allRolls.find(r => (r._id || r.name) === customerData.rollId);
-      if (roll) {
+      // Add PPF if selected
+      if (customerData.ppfCategory && customerData.ppfPrice > 0) {
         items.push({
-          description: `${roll.inventoryName} - ${roll.name} (${customerData.ppfQuantity} sqft)`,
-          quantity: customerData.ppfQuantity,
-          unitPrice: 0, // Usually price is covered by the service, or we can add it here if needed
-          type: "ppf",
-          category: "PPF",
-          rollId: customerData.rollId
+          name: `PPF - ${customerData.ppfCategory} - ${customerData.ppfWarranty}`,
+          price: customerData.ppfPrice,
+          type: 'labor',
+          assignedBusiness: 'Auto Gamma'
         });
       }
-    }
-      
+
       // Add other services
       customerData.selectedOtherServices.forEach(s => {
         items.push({
-          description: s.name,
-          quantity: 1,
-          unitPrice: s.price,
-          type: "service",
-          category: "Service"
+          name: s.vehicleType === "PPF" ? `PPF: ${s.name}` : `${s.name} (${s.vehicleType})`,
+          price: s.price,
+          type: s.vehicleType === "Accessory" ? 'part' : 'labor',
+          assignedBusiness: 'Auto Gamma'
         });
       });
 
       // Add selected accessories
       selectedAccessories.forEach(acc => {
         items.push({
-          description: `${acc.name} (x${acc.quantity})`,
-          quantity: acc.quantity,
-          unitPrice: acc.price,
-          type: "accessory",
-          category: "Accessory"
+          name: `${acc.name} (x${acc.quantity})`,
+          price: acc.price * acc.quantity,
+          type: 'part',
+          assignedBusiness: 'Auto Gamma'
         });
       });
 
-      // Pass via URL parameters
-      const itemsParam = encodeURIComponent(JSON.stringify(items));
-      const technicianParam = customerData.technicianId ? `&technicianId=${customerData.technicianId}` : "";
-      const rollParam = customerData.rollId ? `&rollId=${customerData.rollId}` : "";
-      
-      setLocation(`/invoices?direct=true&autoSubmit=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}${technicianParam}${rollParam}`);
-      return;
+      if (items.length > 0) {
+        setServiceAssignments(items);
+        setAssignBusinessOpen(true);
+        return;
+      }
     }
 
     const selectedService = customerData.ppfCategory
@@ -897,6 +880,26 @@ export default function CustomerRegistration() {
         },
       },
     );
+  };
+
+  const confirmCompleteRegistration = () => {
+    // Collect all items from assignments
+    const items = serviceAssignments.map(item => ({
+      description: item.name,
+      quantity: 1,
+      unitPrice: item.price,
+      type: item.type === 'part' ? 'accessory' : 'service',
+      category: item.type === 'part' ? 'Accessory' : 'Service',
+      assignedBusiness: item.assignedBusiness
+    }));
+
+    // Pass via URL parameters
+    const itemsParam = encodeURIComponent(JSON.stringify(items));
+    const technicianParam = customerData.technicianId ? `&technicianId=${customerData.technicianId}` : "";
+    const rollParam = customerData.rollId ? `&rollId=${customerData.rollId}` : "";
+    
+    setAssignBusinessOpen(false);
+    setLocation(`/invoices?direct=true&autoSubmit=true&customerName=${encodeURIComponent(customerData.name)}&customerPhone=${customerData.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}${technicianParam}${rollParam}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}`);
   };
 
   const validateStep1 = async () => {
@@ -2646,6 +2649,53 @@ export default function CustomerRegistration() {
           </Card>
         )}
       </div>
+      {/* Business Assignment Dialog */}
+      <Dialog open={assignBusinessOpen} onOpenChange={setAssignBusinessOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Assign Items to Business Entities</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Select which business entity each service or accessory should be billed under.
+            </p>
+            <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2">
+              {serviceAssignments.map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-accent/50">
+                  <div className="flex-1 mr-4">
+                    <p className="font-medium text-sm">{item.name}</p>
+                    <p className="text-xs text-muted-foreground">₹{item.price.toLocaleString()}</p>
+                  </div>
+                  <Select
+                    value={item.assignedBusiness}
+                    onValueChange={(val) => {
+                      const newAssignments = [...serviceAssignments];
+                      newAssignments[index].assignedBusiness = val;
+                      setServiceAssignments(newAssignments);
+                    }}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Auto Gamma">Auto Gamma</SelectItem>
+                      <SelectItem value="AGNX">AGNX</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignBusinessOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmCompleteRegistration}>
+              Generate Invoice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
