@@ -25,7 +25,7 @@ import {
   CreditCard,
   Trash2,
 } from "lucide-react";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -77,7 +77,7 @@ export default function Invoices() {
   const queryParams = useMemo(() => new URLSearchParams(window.location.search), []);
   const isDirect = queryParams.get("direct") === "true";
 
-  useMemo(() => {
+  useEffect(() => {
     if (isDirect && !manualInvoiceOpen) {
       const itemsFromUrl = queryParams.get("items");
       const technicianId = queryParams.get("technicianId");
@@ -130,7 +130,7 @@ export default function Invoices() {
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [isDirect, createManualInvoiceMutation, manualInvoiceOpen, queryParams, manualInvoiceData, manualInvoiceDate]);
+  }, [isDirect, manualInvoiceOpen, queryParams]);
 
   const { data: technicians = [] } = useQuery<any[]>({
     queryKey: ["/api/technicians"],
