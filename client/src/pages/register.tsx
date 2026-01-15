@@ -695,28 +695,55 @@ export default function CustomerRegistration() {
   };
 
   const ppfInventoryCategories = useMemo(() => {
+    console.log("DEBUG: Full Inventory Data Count", inventory.length);
+    if (inventory.length > 0) {
+      console.log("DEBUG: First Inventory Item Keys", Object.keys(inventory[0]));
+      console.log("DEBUG: First Inventory Item Data", inventory[0]);
+    }
+
     const ppfInventory = inventory.filter(item => {
-      const isPpfFlag = item.isPpf === true || item.isPpf === 'true';
-      const cat = (item.category || "").toString().toLowerCase();
-      const name = (item.name || "").toString().toLowerCase();
-      return isPpfFlag || cat.includes('ppf') || name.includes('ppf');
+      // Normalize keys just in case
+      const isPpfFlag = item.isPpf === true || item.isPpf === 'true' || item.isPPF === true || item.isPPF === 'true';
+      const cat = (item.category || item.Category || "").toString().toLowerCase();
+      const name = (item.name || item.Name || "").toString().toLowerCase();
+      
+      const matches = isPpfFlag || 
+                      cat.includes('ppf') || 
+                      name.includes('ppf') || 
+                      name.includes('garware') || 
+                      name.includes('elite') ||
+                      cat.includes('roll');
+                      
+      if (matches) console.log("DEBUG: Found PPF Item", name, cat);
+      return matches;
     });
     
     const categoriesSet = new Set<string>();
     ppfInventory.forEach(item => {
-      const catName = (item.category || item.name || "").toString().trim();
-      if (catName) categoriesSet.add(catName);
+      const cat = (item.category || item.Category || "").toString().trim();
+      const name = (item.name || item.Name || "").toString().trim();
+      
+      let label = cat;
+      // If category is too generic or missing, use name
+      if (!cat || cat.toLowerCase() === 'ppf' || cat.toLowerCase() === 'accessories' || cat.toLowerCase() === 'inventory') {
+        label = name;
+      }
+      
+      if (label) categoriesSet.add(label);
     });
     
     const result = Array.from(categoriesSet).sort().map(cat => {
-      const inventoryItems = inventory.filter(i => (i.category || i.name) === cat);
-      const hasRolls = inventoryItems.some(i => i.rolls && i.rolls.length > 0);
+      const inventoryItems = inventory.filter(i => 
+        (i.category || i.Category || "").toString().trim() === cat || 
+        (i.name || i.Name || "").toString().trim() === cat
+      );
+      const hasRolls = inventoryItems.some(i => (i.rolls && i.rolls.length > 0) || (i.Rolls && i.Rolls.length > 0));
       return {
         name: cat,
         hasRolls: hasRolls
       };
     });
-    console.log("DEBUG: ppfInventoryCategories", result);
+    console.log("DEBUG: Final ppfInventoryCategories", result);
     return result;
   }, [inventory]);
 
