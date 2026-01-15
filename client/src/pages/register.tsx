@@ -695,26 +695,29 @@ export default function CustomerRegistration() {
   };
 
   const ppfInventoryCategories = useMemo(() => {
-    const ppfInventory = inventory.filter(item => 
-      item.isPpf === true || 
-      item.isPpf === 'true' || 
-      (item.category && item.category.toLowerCase().includes('ppf')) ||
-      (item.name && item.name.toLowerCase().includes('ppf'))
-    );
+    const ppfInventory = inventory.filter(item => {
+      const isPpfFlag = item.isPpf === true || item.isPpf === 'true';
+      const cat = (item.category || "").toString().toLowerCase();
+      const name = (item.name || "").toString().toLowerCase();
+      return isPpfFlag || cat.includes('ppf') || name.includes('ppf');
+    });
     
     const categoriesSet = new Set<string>();
     ppfInventory.forEach(item => {
-      if (item.category) categoriesSet.add(item.category);
-      else if (item.name) categoriesSet.add(item.name);
+      const catName = (item.category || item.name || "").toString().trim();
+      if (catName) categoriesSet.add(catName);
     });
     
-    return Array.from(categoriesSet).sort().map(cat => {
-      const inventoryItem = inventory.find(i => (i.category || i.name) === cat);
+    const result = Array.from(categoriesSet).sort().map(cat => {
+      const inventoryItems = inventory.filter(i => (i.category || i.name) === cat);
+      const hasRolls = inventoryItems.some(i => i.rolls && i.rolls.length > 0);
       return {
         name: cat,
-        hasRolls: !!(inventoryItem?.rolls && inventoryItem.rolls.length > 0)
+        hasRolls: hasRolls
       };
     });
+    console.log("DEBUG: ppfInventoryCategories", result);
+    return result;
   }, [inventory]);
 
   const ppfCategoriesFromServices = useMemo(() => {
@@ -1372,7 +1375,7 @@ export default function CustomerRegistration() {
                                           onKeyDown={(e) => e.stopPropagation()}
                                         />
                                       </div>
-                                      {ppfInventoryCategories.length > 0 ? (
+                                      {ppfInventoryCategories && ppfInventoryCategories.length > 0 ? (
                                         ppfInventoryCategories.map((cat: any) => (
                                           <SelectItem key={cat.name} value={cat.name}>
                                             {cat.name} {cat.hasRolls ? "(In Stock)" : "(No Rolls)"}
@@ -1380,7 +1383,7 @@ export default function CustomerRegistration() {
                                         ))
                                       ) : (
                                         <div className="p-4 text-center text-sm text-slate-500">
-                                          No categories available
+                                          No products available in inventory
                                         </div>
                                       )}
                                     </SelectContent>
