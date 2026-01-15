@@ -708,46 +708,43 @@ export default function CustomerRegistration() {
   };
 
   const ppfInventoryCategories = useMemo(() => {
-    console.log("DEBUG: Full Inventory Data Count", inventory.length);
-    if (inventory.length > 0) {
-      console.log("DEBUG: First Inventory Item Keys", Object.keys(inventory[0]));
-      console.log("DEBUG: First Inventory Item Data", inventory[0]);
-    }
-
-    const ppfInventory = inventory.filter(item => {
-      // Normalize keys just in case
-      const isPpfFlag = item.isPpf === true || item.isPpf === 'true' || item.isPPF === true || item.isPPF === 'true';
-      const cat = (item.category || item.Category || "").toString().toLowerCase();
-      const name = (item.name || item.Name || "").toString().toLowerCase();
-      
-      const matches = isPpfFlag || 
-                      cat.includes('ppf') || 
-                      name.includes('ppf') || 
-                      name.includes('garware') || 
-                      name.includes('elite') ||
-                      cat.includes('roll');
-                      
-      if (matches) console.log("DEBUG: Found PPF Item", name, cat);
-      return matches;
-    });
-    
+    // Combine categories from dedicated PPF categories AND from inventory items flagged as PPF
     const categoriesSet = new Set<string>();
-    ppfInventory.forEach(item => {
-      const cat = (item.category || item.Category || "").toString().trim();
-      const name = (item.name || item.Name || "").toString().trim();
-      
-      let label = cat;
-      // If category is too generic or missing, use name
-      if (!cat || cat.toLowerCase() === 'ppf' || cat.toLowerCase() === 'accessories' || cat.toLowerCase() === 'inventory') {
-        label = name;
-      }
-      
-      if (label) categoriesSet.add(label);
+
+    // 1. Add categories from the dedicated PPF categories collection
+    dbPpfCategories.forEach(cat => {
+      if (cat.name) categoriesSet.add(cat.name.trim());
     });
-    
+
+    // 2. Add categories from inventory items that are flagged as PPF
+    inventory.forEach(item => {
+      const isPpfFlag = item.isPpf === true || item.isPpf === 'true' || item.isPPF === true || item.isPPF === 'true';
+      const catName = (item.category || item.Category || "").toString().trim();
+      const itemName = (item.name || item.Name || "").toString().trim();
+
+      if (isPpfFlag) {
+        if (catName && catName.toLowerCase() !== 'inventory' && catName.toLowerCase() !== 'accessories') {
+          categoriesSet.add(catName);
+        } else if (itemName) {
+          categoriesSet.add(itemName);
+        }
+      } else {
+        // Fallback for items that might not have the flag but are clearly PPF
+        const lowerCat = catName.toLowerCase();
+        const lowerName = itemName.toLowerCase();
+        if (lowerCat.includes('ppf') || lowerName.includes('ppf') || lowerName.includes('garware') || lowerName.includes('elite')) {
+          if (catName && lowerCat !== 'inventory' && lowerCat !== 'accessories') {
+            categoriesSet.add(catName);
+          } else if (itemName) {
+            categoriesSet.add(itemName);
+          }
+        }
+      }
+    });
+
     const result = Array.from(categoriesSet).sort().map(cat => {
-      const inventoryItems = inventory.filter(i => 
-        (i.category || i.Category || "").toString().trim() === cat || 
+      const inventoryItems = inventory.filter(i =>
+        (i.category || i.Category || "").toString().trim() === cat ||
         (i.name || i.Name || "").toString().trim() === cat
       );
       const hasRolls = inventoryItems.some(i => (i.rolls && i.rolls.length > 0) || (i.Rolls && i.Rolls.length > 0));
@@ -756,9 +753,8 @@ export default function CustomerRegistration() {
         hasRolls: hasRolls
       };
     });
-    console.log("DEBUG: Final ppfInventoryCategories", result);
     return result;
-  }, [inventory]);
+  }, [inventory, dbPpfCategories]);
 
   const ppfCategoriesFromServices = useMemo(() => {
     return dbServices
