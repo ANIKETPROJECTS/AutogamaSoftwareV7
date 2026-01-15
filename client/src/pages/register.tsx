@@ -2367,18 +2367,20 @@ export default function CustomerRegistration() {
                     </div>
                   </div>
                 )}
+              </div>
 
-                <div className="md:col-span-2 flex justify-end pt-6 border-t border-slate-100">
-                  <Button
-                    onClick={handleNextStep}
-                    disabled={!canProceedStep1}
-                    className="px-8 shadow-sm hover:shadow-md transition-all"
-                    data-testid="button-next-step"
-                  >
-                    Vehicle Information
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
+              {/* Navigation Buttons */}
+              <div className="flex justify-end pt-6 border-t border-slate-200">
+                <Button
+                  onClick={handleNextStep}
+                  disabled={!canProceedStep1}
+                  className="px-8 shadow-sm hover:shadow-md transition-all"
+                  data-testid="button-next-step"
+                >
+                  Vehicle Information
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
