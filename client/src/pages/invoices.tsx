@@ -390,7 +390,7 @@ export default function Invoices() {
     const logoUrl = `/${currentLogo}`;
     console.log("Logo selected:", { currentLogo, logoUrl, isBusiness2 });
     const gstAmount = (invoice.taxAmount || 0);
-    const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
+    const gstLabel = gstAmount > 0 ? "With GST" : "NON GST";
 
     const logoHtml = `<div style="text-align: center; width: 100%; min-height: 80px; margin-bottom: 10px;">
       <img src="${logoUrl}" 
@@ -1214,7 +1214,7 @@ export default function Invoices() {
             const currentLogo = isBusiness2 ? "logo2.png" : "logo.png";
             const logoUrl = `/${currentLogo}`;
             const gstAmount = (selectedInvoice.taxAmount || 0);
-            const gstLabel = gstAmount > 0 ? "With GST" : "Non GST";
+            const gstLabel = gstAmount > 0 ? "With GST" : "NON GST";
 
             const calculatedSubtotal = selectedInvoice.items.reduce((sum: number, item: any) => sum + ((item.unitPrice * (item.quantity || 1)) - (item.discount || 0)), 0);
             const calculatedGrandTotal = (selectedInvoice.totalAmount || (calculatedSubtotal + (selectedInvoice.taxAmount || 0) - (selectedInvoice.discount || 0)));
