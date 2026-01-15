@@ -436,6 +436,8 @@ export default function CustomerRegistration() {
     ppfQuantity: 1,
     discount: 0,
     taxPercentage: 18,
+    laborCharge: 0,
+    serviceNotes: "",
   });
 
   const setManualRollId = (val: string) => {
@@ -668,7 +670,7 @@ export default function CustomerRegistration() {
         // Redirect to invoice generation for the first vehicle
         // We'll pass the customer and vehicle info via location state or query params
         // Assuming there's a way to handle this on the invoices page
-        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&discount=${customerData.discount}&tax=${customerData.taxPercentage}`);
+        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}`);
       } else {
         setLocation("/registered-customers");
       }
@@ -2582,35 +2584,62 @@ export default function CustomerRegistration() {
                   Previous
                 </Button>
                 {isInvoiceDirect && (
-                  <div className="flex gap-4 items-end">
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-500">Discount (₹)</Label>
-                      <Input
-                        type="text"
-                        value={customerData.discount === 0 ? "" : customerData.discount}
-                        onChange={(e) => {
-                          const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
-                          if (!isNaN(val as number)) {
-                            setCustomerData(prev => ({ ...prev, discount: val as number }));
-                          }
-                        }}
-                        placeholder="0"
-                        className="h-9 w-24 bg-white"
-                      />
+                  <div className="flex flex-col gap-4 mb-4">
+                    <div className="flex gap-4 items-end">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-500">Labor Charge (₹)</Label>
+                        <Input
+                          type="text"
+                          value={customerData.laborCharge === 0 ? "" : customerData.laborCharge}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                            if (!isNaN(val as number)) {
+                              setCustomerData(prev => ({ ...prev, laborCharge: val as number }));
+                            }
+                          }}
+                          placeholder="0"
+                          className="h-9 w-24 bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-500">Discount (₹)</Label>
+                        <Input
+                          type="text"
+                          value={customerData.discount === 0 ? "" : customerData.discount}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                            if (!isNaN(val as number)) {
+                              setCustomerData(prev => ({ ...prev, discount: val as number }));
+                            }
+                          }}
+                          placeholder="0"
+                          className="h-9 w-24 bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-500">GST (%)</Label>
+                        <Input
+                          type="text"
+                          value={customerData.taxPercentage === 0 ? "" : customerData.taxPercentage}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                            if (!isNaN(val as number)) {
+                              setCustomerData(prev => ({ ...prev, taxPercentage: val as number }));
+                            }
+                          }}
+                          placeholder="0"
+                          className="h-9 w-20 bg-white"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-500">GST (%)</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-500">Service Notes</Label>
                       <Input
                         type="text"
-                        value={customerData.taxPercentage === 0 ? "" : customerData.taxPercentage}
-                        onChange={(e) => {
-                          const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
-                          if (!isNaN(val as number)) {
-                            setCustomerData(prev => ({ ...prev, taxPercentage: val as number }));
-                          }
-                        }}
-                        placeholder="0"
-                        className="h-9 w-20 bg-white"
+                        value={customerData.serviceNotes}
+                        onChange={(e) => setCustomerData(prev => ({ ...prev, serviceNotes: e.target.value }))}
+                        placeholder="Additional notes..."
+                        className="h-9 w-full bg-white"
                       />
                     </div>
                   </div>
