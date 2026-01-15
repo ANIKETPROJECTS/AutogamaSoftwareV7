@@ -693,50 +693,27 @@ export default function CustomerRegistration() {
     }
   };
 
-  const ppfCategoriesFromInventory = useMemo(() => {
-    console.log("DEBUG: Computing ppfCategoriesFromInventory", { 
-      inventoryLength: inventory.length, 
-      dbPpfCategoriesLength: dbPpfCategories.length 
-    });
-
-    // Get unique categories from inventory items that are marked as isPpf
-    const categoriesFromInventory = Array.from(new Set(inventory
-      .filter(item => {
-        const isPpf = item.isPpf === true || item.isPpf === 'true' || (item.category && item.category.toLowerCase().includes('ppf'));
-        if (isPpf) console.log("DEBUG: Found PPF item in inventory", item.name, item.category);
-        return isPpf;
-      })
-      .map(item => item.category || item.name)
-    )).filter(Boolean);
-
-    // Also include any categories from the database categories collection
-    const databaseCategoryNames = dbPpfCategories.map((cat: any) => cat.name);
+  const ppfCategoriesFromServices = useMemo(() => {
+    // Get unique names from services that are marked as isPpf
+    const ppfServices = dbServices.filter(s => s.isPpf);
     
-    // Combine both and remove duplicates
-    const allCategoryNames = Array.from(new Set([...categoriesFromInventory, ...databaseCategoryNames]));
-    console.log("DEBUG: All PPF Category Names", allCategoryNames);
-
-    return allCategoryNames.map((name: any) => {
-      // Map warranty options from services based on matching name
-      const serviceMatch = dbServices.find((s: any) => 
-        s.name.toLowerCase().trim() === name.toString().toLowerCase().trim()
-      );
-      
+    return ppfServices.map((service: any) => {
+      // Find matching inventory item to check for rolls
       const categoryInventory = inventory.find(item => {
         const isPpf = item.isPpf === true || item.isPpf === 'true' || (item.category && item.category.toLowerCase().includes('ppf'));
-        const catMatch = (item.category || item.name) === name;
+        const catMatch = (item.category || item.name).toLowerCase().trim() === service.name.toLowerCase().trim();
         return isPpf && catMatch;
       });
 
       return {
-        _id: name,
-        name: name,
+        _id: service._id,
+        name: service.name,
         isPpf: true,
-        warrantyOptions: serviceMatch?.warrantyOptions || {},
+        warrantyOptions: service.warrantyOptions || {},
         hasRolls: !!(categoryInventory?.rolls && categoryInventory.rolls.length > 0)
       };
     });
-  }, [inventory, dbPpfCategories, dbServices]);
+  }, [dbServices, inventory]);
 
   const selectedPpfProducts = useMemo(() => {
     if (!customerData.ppfCategory) return [];
