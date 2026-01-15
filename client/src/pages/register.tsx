@@ -418,6 +418,7 @@ export default function CustomerRegistration() {
     referrerName: "",
     referrerPhone: "",
     registrationDate: new Date().toISOString().split('T')[0],
+    invoiceDate: new Date().toISOString().split('T')[0],
     ppfCategory: "",
     ppfVehicleType: "",
     ppfWarranty: "",
@@ -671,7 +672,7 @@ export default function CustomerRegistration() {
         // Redirect to invoice generation for the first vehicle
         // We'll pass the customer and vehicle info via location state or query params
         // Assuming there's a way to handle this on the invoices page
-        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}`);
+        setLocation(`/invoices?direct=true&customerId=${customer._id}&customerName=${encodeURIComponent(customer.name)}&customerPhone=${customer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}&invoiceDate=${customerData.invoiceDate}`);
       } else {
         setLocation("/registered-customers");
       }
@@ -1101,6 +1102,18 @@ export default function CustomerRegistration() {
                       />
                       <Label htmlFor="invoice-direct" className="text-xs font-semibold text-slate-600">Create Invoice Directly</Label>
                     </div>
+                    {isInvoiceDirect && (
+                      <div className="mt-2 space-y-1">
+                        <Label htmlFor="invoice-date" className="text-[10px] font-bold text-slate-500 uppercase">Invoice Date</Label>
+                        <Input
+                          id="invoice-date"
+                          type="date"
+                          value={customerData.invoiceDate}
+                          onChange={(e) => setCustomerData({ ...customerData, invoiceDate: e.target.value })}
+                          className="h-7 text-xs"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               <p className="text-sm text-slate-600 mt-2">

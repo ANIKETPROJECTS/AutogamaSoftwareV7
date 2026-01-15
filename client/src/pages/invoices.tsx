@@ -83,8 +83,20 @@ export default function Invoices() {
       const technicianId = queryParams.get("technicianId");
       const rollId = queryParams.get("rollId");
       const autoSubmit = queryParams.get("autoSubmit") === "true";
+      const invoiceDateParam = queryParams.get("invoiceDate");
       let initialItems = [{ description: "", quantity: 1, unitPrice: 0, type: "service" }];
       
+      if (invoiceDateParam) {
+        try {
+          const parsedDate = new Date(invoiceDateParam);
+          if (!isNaN(parsedDate.getTime())) {
+            setManualInvoiceDate(parsedDate);
+          }
+        } catch (e) {
+          console.error("Failed to parse invoice date from URL", e);
+        }
+      }
+
       if (itemsFromUrl) {
         try {
           initialItems = JSON.parse(decodeURIComponent(itemsFromUrl));
