@@ -699,11 +699,25 @@ export default function CustomerRegistration() {
     const ppfInventory = inventory.filter(item => 
       item.isPpf === true || 
       item.isPpf === 'true' || 
-      (item.category && item.category.toLowerCase().includes('ppf'))
+      (item.category && item.category.toLowerCase().includes('ppf')) ||
+      (item.name && item.name.toLowerCase().includes('ppf'))
     );
     
-    // Get unique categories/names
-    const categories = Array.from(new Set(ppfInventory.map(item => item.category || item.name)));
+    // Get unique categories/names from inventory
+    const categoriesSet = new Set<string>();
+    ppfInventory.forEach(item => {
+      if (item.category) categoriesSet.add(item.category);
+      if (item.name) categoriesSet.add(item.name);
+    });
+    
+    // Also include categories from dbServices if they are missing
+    dbServices.forEach(s => {
+      if (s.isPpf && s.name) {
+        categoriesSet.add(s.name);
+      }
+    });
+
+    const categories = Array.from(categoriesSet).sort();
 
     return categories.map(catName => {
       const service = dbServices.find(s => s.name === catName && s.isPpf);
