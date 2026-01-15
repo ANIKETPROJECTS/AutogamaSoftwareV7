@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FileText } from "lucide-react";
 import {
   Dialog,
   DialogContent,
