@@ -833,7 +833,7 @@ export default function CustomerRegistration() {
         const isPpfSqFt = s.vehicleType === "PPF";
         items.push({
           name: isPpfSqFt ? s.name : `${s.name} (${s.vehicleType})`,
-          price: isPpfSqFt ? 1 : s.price,
+          price: isPpfSqFt ? 0 : s.price, // Set price to 0 for PPF sq ft items
           quantity: isPpfSqFt ? (s as any).quantity || 1 : 1,
           type: s.vehicleType === "Accessory" ? 'part' : 'labor',
           assignedBusiness: 'Auto Gamma'
@@ -1574,7 +1574,7 @@ export default function CustomerRegistration() {
                                         {
                                           name: `PPF: ${prev.ppfCategory} - ${prev.ppfQuantity} sq ft`,
                                           vehicleType: "PPF",
-                                          price: 1, // Unit price is 1 for square feet billing
+                                          price: 0, // Set price to 0 as requested
                                           quantity: prev.ppfQuantity
                                         }
                                       ],
