@@ -116,6 +116,21 @@ function SearchableSelect({
             </div>
           </div>
           <div className="max-h-[300px] overflow-y-auto p-1">
+            {allowCustom && (
+              <div className="border-b mb-1 pb-1">
+                <div
+                  className="flex items-center gap-2 cursor-pointer py-1.5 px-2 text-sm text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-sm font-medium"
+                  onClick={() => {
+                    setIsAddingNew(true);
+                    onValueChange("");
+                    setOpen(false);
+                    setInputValue("");
+                  }}
+                >
+                  {customLabel}
+                </div>
+              </div>
+            )}
             {filteredOptions.length === 0 && !inputValue && (
               <div className="p-2 text-sm text-center text-muted-foreground">{emptyMessage}</div>
             )}
@@ -142,21 +157,6 @@ function SearchableSelect({
                 </div>
               ))}
             </div>
-            {allowCustom && (
-              <div className="border-t mt-1 pt-1">
-                <div
-                  className="flex items-center gap-2 cursor-pointer py-1.5 px-2 text-sm text-[#E11D48] hover:bg-[#E11D48]/10 transition-colors rounded-sm font-medium"
-                  onClick={() => {
-                    setIsAddingNew(true);
-                    onValueChange("");
-                    setOpen(false);
-                    setInputValue("");
-                  }}
-                >
-                  {customLabel}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </PopoverContent>
