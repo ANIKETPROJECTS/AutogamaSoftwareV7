@@ -947,7 +947,39 @@ export default function CustomerRegistration() {
     );
   };
 
-  const confirmCompleteRegistration = () => {
+  const confirmCompleteRegistration = async () => {
+    // Collect all items from assignments first so they are available for both flows
+    const items = serviceAssignments.map(item => ({
+      description: item.name,
+      quantity: 1,
+      unitPrice: item.price,
+      type: item.type === 'part' ? 'accessory' : 'service',
+      category: item.type === 'part' ? 'Accessory' : 'Service',
+      assignedBusiness: item.assignedBusiness
+    }));
+
+    const itemsParam = encodeURIComponent(JSON.stringify(items));
+    const technicianParam = customerData.technicianId ? `&technicianId=${customerData.technicianId}` : "";
+    const rollParam = customerData.rollId ? `&rollId=${customerData.rollId}` : "";
+
+    // Check if customer exists by phone number
+    try {
+      const response = await fetch(`/api/customers/check-phone/${customerData.phone}`);
+      const data = await response.json();
+      
+      if (data.exists) {
+        // Customer exists, skip registration and redirect to invoice directly
+        const existingCustomer = data.customer;
+        
+        setAssignBusinessOpen(false);
+        // Using existing customer ID
+        setLocation(`/invoices?direct=true&autoSubmit=true&customerId=${existingCustomer._id}&customerName=${encodeURIComponent(existingCustomer.name)}&customerPhone=${existingCustomer.phone}&vehicleName=${encodeURIComponent(vehicleData.make + " " + vehicleData.model)}&plateNumber=${encodeURIComponent(vehicleData.plateNumber)}&items=${itemsParam}${technicianParam}${rollParam}&discount=${customerData.discount}&tax=${customerData.taxPercentage}&labor=${customerData.laborCharge}&notes=${encodeURIComponent(customerData.serviceNotes)}&invoiceDate=${customerData.invoiceDate}`);
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking customer existence:", error);
+    }
+
     const selectedService = customerData.ppfCategory
       ? `${customerData.ppfCategory} - ${customerData.ppfWarranty}`
       : "";
