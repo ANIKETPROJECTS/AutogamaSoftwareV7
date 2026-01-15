@@ -695,23 +695,26 @@ export default function CustomerRegistration() {
   };
 
   const ppfCategoriesFromServices = useMemo(() => {
-    // Get unique names from services that are marked as isPpf
-    const ppfServices = dbServices.filter(s => s.isPpf);
+    // Show all PPF categories from inventory as they have the rolls
+    const ppfInventory = inventory.filter(item => 
+      item.isPpf === true || 
+      item.isPpf === 'true' || 
+      (item.category && item.category.toLowerCase().includes('ppf'))
+    );
     
-    return ppfServices.map((service: any) => {
-      // Find matching inventory item to check for rolls
-      const categoryInventory = inventory.find(item => {
-        const isPpf = item.isPpf === true || item.isPpf === 'true' || (item.category && item.category.toLowerCase().includes('ppf'));
-        const catMatch = (item.category || item.name).toLowerCase().trim() === service.name.toLowerCase().trim();
-        return isPpf && catMatch;
-      });
+    // Get unique categories/names
+    const categories = Array.from(new Set(ppfInventory.map(item => item.category || item.name)));
+
+    return categories.map(catName => {
+      const service = dbServices.find(s => s.name === catName && s.isPpf);
+      const inventoryItem = inventory.find(item => (item.category || item.name) === catName);
 
       return {
-        _id: service._id,
-        name: service.name,
+        _id: service?._id || catName,
+        name: catName,
         isPpf: true,
-        warrantyOptions: service.warrantyOptions || {},
-        hasRolls: !!(categoryInventory?.rolls && categoryInventory.rolls.length > 0)
+        warrantyOptions: service?.warrantyOptions || {},
+        hasRolls: !!(inventoryItem?.rolls && inventoryItem.rolls.length > 0)
       };
     });
   }, [dbServices, inventory]);
