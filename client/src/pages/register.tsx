@@ -830,9 +830,11 @@ export default function CustomerRegistration() {
 
       // Add other services
       customerData.selectedOtherServices.forEach(s => {
+        const isPpfSqFt = s.vehicleType === "PPF";
         items.push({
-          name: s.vehicleType === "PPF" ? `PPF: ${s.name}` : `${s.name} (${s.vehicleType})`,
-          price: s.price,
+          name: isPpfSqFt ? s.name : `${s.name} (${s.vehicleType})`,
+          price: isPpfSqFt ? 1 : s.price,
+          quantity: isPpfSqFt ? (s as any).quantity || 1 : 1,
           type: s.vehicleType === "Accessory" ? 'part' : 'labor',
           assignedBusiness: 'Auto Gamma'
         });
@@ -951,7 +953,7 @@ export default function CustomerRegistration() {
     // Collect all items from assignments first so they are available for both flows
     const items = serviceAssignments.map(item => ({
       description: item.name,
-      quantity: 1,
+      quantity: item.quantity || 1,
       unitPrice: item.price,
       type: item.type === 'part' ? 'accessory' : 'service',
       category: item.type === 'part' ? 'Accessory' : 'Service',
@@ -1570,12 +1572,12 @@ export default function CustomerRegistration() {
                                       selectedOtherServices: [
                                         ...prev.selectedOtherServices,
                                         {
-                                          name: `PPF: ${prev.ppfCategory}`,
+                                          name: `PPF: ${prev.ppfCategory} - ${prev.ppfQuantity} sq ft`,
                                           vehicleType: "PPF",
-                                          price: prev.ppfQuantity, // Store quantity in price field for PPF type
+                                          price: 1, // Unit price is 1 for square feet billing
+                                          quantity: prev.ppfQuantity
                                         }
                                       ],
-                                      // We don't reset ppfCategory here because it's linked to the bottom dropdown
                                       ppfQuantity: 1
                                     }));
                                     
