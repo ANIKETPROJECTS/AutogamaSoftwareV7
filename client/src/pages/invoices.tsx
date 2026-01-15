@@ -393,13 +393,11 @@ export default function Invoices() {
     const calculatedGrandTotal = (invoice.totalAmount || (calculatedSubtotal + (invoice.taxAmount || 0) - (invoice.discount || 0)));
     const calculatedGST = Math.max(0, calculatedGrandTotal - calculatedSubtotal);
 
-    const isGST = Number(invoice.tax || 0) > 0 || Number(invoice.taxAmount || 0) > 0 || (invoice.taxRate && Number(invoice.taxRate) > 0);
-    const gstLabel = isGST ? "With GST" : "NON GST";
-    console.log(`[Invoice ${invoice.invoiceNumber}] GST Check:`, {
-      tax: invoice.tax,
-      taxAmount: invoice.taxAmount,
-      taxRate: invoice.taxRate,
-      isGST,
+    const gstLabel = calculatedGST > 1 ? "With GST" : "NON GST";
+    console.log(`[Invoice ${invoice.invoiceNumber}] GST Check (Real-time):`, {
+      calculatedSubtotal,
+      calculatedGrandTotal,
+      calculatedGST,
       gstLabel
     });
 
