@@ -735,18 +735,9 @@ export default function CustomerRegistration() {
   }, [inventory, dbPpfCategories, dbServices]);
 
   const selectedPpfProducts = useMemo(() => {
-    console.log("DEBUG: Computing selectedPpfProducts", { 
-      ppfCategory: customerData.ppfCategory,
-      inventoryLength: inventory.length 
-    });
-    
-    // Log the entire inventory to see what's available
-    console.log("DEBUG: Full Inventory Data:", inventory);
-
     if (!customerData.ppfCategory) return [];
     
     const items = inventory.filter(item => {
-      // Improved matching logic: check isPpf flag, category, or if the name matches the selected PPF category
       const isPpf = item.isPpf === true || 
                     item.isPpf === 'true' || 
                     (item.category && item.category.toLowerCase().includes('ppf')) ||
@@ -757,23 +748,19 @@ export default function CustomerRegistration() {
       return isPpf && catMatch;
     });
 
-    console.log("DEBUG: Found matching inventory items for category", customerData.ppfCategory, items);
-
     const rolls = items.flatMap(item => (item.rolls || []).map((roll: any) => ({
       ...roll,
       inventoryName: item.name,
       inventoryId: item._id
     })));
 
-    console.log("DEBUG: Final Resulting rolls for dropdown", rolls);
-    
-    // Additional log for specific drop-down fetched data as requested
-    if (rolls.length > 0) {
-      console.log("SUCCESS: Dropdown data fetched after ticking checkbox:", rolls);
-    }
-    
     return rolls;
   }, [inventory, customerData.ppfCategory]);
+
+  const categoryStock = useMemo(() => {
+    if (!customerData.ppfCategory) return 0;
+    return selectedPpfProducts.reduce((acc, roll) => acc + (roll.remaining_sqft || roll.remainingSqft || 0), 0);
+  }, [selectedPpfProducts, customerData.ppfCategory]);
 
   const selectedRollData = useMemo(() => {
     return allRolls.find(r => (r._id || r.name) === customerData.rollId);
@@ -1405,11 +1392,11 @@ export default function CustomerRegistration() {
                                   </Select>
                                 </div>
 
-                                {selectedRollData && (
+                                {customerData.ppfCategory && (
                                   <div className="bg-blue-100/50 rounded-lg p-3 flex justify-between items-center">
                                     <span className="text-sm font-medium text-blue-800">Available Stock</span>
                                     <span className="font-bold text-blue-900">
-                                      {(selectedRollData.remaining_sqft || selectedRollData.remainingSqft || 0).toFixed(2)} sq ft
+                                      {categoryStock.toFixed(2)} sq ft
                                     </span>
                                   </div>
                                 )}
@@ -1419,9 +1406,21 @@ export default function CustomerRegistration() {
                                   <Input
                                     type="number"
                                     value={customerData.ppfQuantity}
-                                    onChange={(e) => setCustomerData(prev => ({ ...prev, ppfQuantity: parseFloat(e.target.value) || 0 }))}
+                                    onChange={(e) => {
+                                      const val = parseFloat(e.target.value) || 0;
+                                      if (val > categoryStock) {
+                                        toast({ 
+                                          title: "Insufficient Stock", 
+                                          description: `Only ${categoryStock.toFixed(2)} sq ft available in this category.`,
+                                          variant: "destructive" 
+                                        });
+                                        return;
+                                      }
+                                      setCustomerData(prev => ({ ...prev, ppfQuantity: val }));
+                                    }}
                                     className="bg-white border-primary/20"
                                     min="0"
+                                    max={categoryStock}
                                     step="0.01"
                                   />
                                 </div>
