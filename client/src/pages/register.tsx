@@ -759,7 +759,7 @@ export default function CustomerRegistration() {
       inventoryId: item._id
     })));
 
-    console.log("DEBUG: Dropdown Fetched Rolls:", rolls);
+    console.log("DEBUG: Final Resulting rolls for dropdown", rolls);
     
     // Additional log for specific drop-down fetched data as requested
     if (rolls.length > 0) {
@@ -1069,10 +1069,14 @@ export default function CustomerRegistration() {
                         checked={isInvoiceDirect}
                         onChange={(e) => {
                           const checked = e.target.checked;
+                          console.log("DEBUG: Checkbox changed", checked);
                           setIsInvoiceDirect(checked);
                           if (checked) {
+                            console.log("DEBUG: Ticking checkbox - refetching inventory...");
                             // Explicitly refetch inventory when checkbox is ticked
-                            refetchInventory();
+                            refetchInventory().then((res) => {
+                              console.log("DEBUG: Refetch completed", res.data);
+                            });
                           }
                         }}
                         className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
