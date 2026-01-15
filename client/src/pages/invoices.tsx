@@ -405,7 +405,6 @@ export default function Invoices() {
       <img src="${logoUrl}" 
            alt="${currentBusinessName} Logo" 
            style="height: 80px; width: auto; max-width: 250px; object-fit: contain; margin: 0 auto; display: block;" />
-      <p style="color: #6b7280; font-size: 14px; font-weight: 600; margin: 8px 0 0 0; text-transform: uppercase;">${gstLabel}</p>
     </div>`;
 
     return `
