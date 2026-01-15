@@ -969,7 +969,7 @@ export default function CustomerRegistration() {
       const response = await fetch(`/api/customers/check-phone/${customerData.phone}`);
       const data = await response.json();
       
-      if (data.exists) {
+      if (data.exists && data.customer) {
         // Customer exists, skip registration and redirect to invoice directly
         const existingCustomer = data.customer;
         
