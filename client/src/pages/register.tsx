@@ -2258,32 +2258,6 @@ export default function CustomerRegistration() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Referral Source</Label>
-                    <Select
-                      value={customerData.referralSource}
-                      onValueChange={(value) =>
-                        setCustomerData({
-                          ...customerData,
-                          referralSource: value,
-                        })
-                      }
-                    >
-                      <SelectTrigger
-                        className="border-slate-300"
-                        data-testid="select-referral"
-                      >
-                        <SelectValue placeholder="How did you hear about us?" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {REFERRAL_SOURCES.map((source) => (
-                          <SelectItem key={source} value={source}>
-                            {source}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
 
                 {isInvoiceDirect && (
