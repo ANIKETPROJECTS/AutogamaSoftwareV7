@@ -393,11 +393,13 @@ export default function Invoices() {
     const calculatedGrandTotal = (invoice.totalAmount || (calculatedSubtotal + (invoice.taxAmount || 0) - (invoice.discount || 0)));
     const calculatedGST = Math.max(0, calculatedGrandTotal - calculatedSubtotal);
 
-    const gstAmount = invoice.tax || 0;
-    const isGST = gstAmount > 0;
-    console.log("GST Calculation Debug:", {
+    const gstAmount = Number(invoice.tax || 0) + Number(invoice.taxAmount || 0);
+    const isGST = gstAmount > 0 || (invoice.taxRate && invoice.taxRate > 0);
+    console.log("GST Calculation Debug (Global):", {
       invoiceNumber: invoice.invoiceNumber,
       tax: invoice.tax,
+      taxAmount: invoice.taxAmount,
+      taxRate: invoice.taxRate,
       calculatedGST,
       gstAmount,
       isGST
