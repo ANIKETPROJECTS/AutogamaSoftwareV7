@@ -1223,11 +1223,13 @@ export default function Invoices() {
             const calculatedSubtotal = selectedInvoice.items.reduce((sum: number, item: any) => sum + ((item.unitPrice * (item.quantity || 1)) - (item.discount || 0)), 0);
             const calculatedGrandTotal = (selectedInvoice.totalAmount || (calculatedSubtotal + (selectedInvoice.taxAmount || 0) - (selectedInvoice.discount || 0)));
             const calculatedGST = Math.max(0, calculatedGrandTotal - calculatedSubtotal);
+            const gstLabel = calculatedGST > 1 ? "With GST" : "NON GST";
 
             return (
               <div ref={printRef} className="space-y-6">
                 <div className="header text-center">
                   <img src={logoUrl} alt={`${currentBusinessName} Logo`} className="h-10 mx-auto mb-2 object-contain" />
+                  <p className="text-muted-foreground uppercase font-bold text-sm tracking-wider">{gstLabel}</p>
                   <p className="text-muted-foreground">Invoice</p>
                 </div>
 
