@@ -184,7 +184,7 @@ export interface IInvoiceItem {
   quantity: number;
   unitPrice: number;
   total: number;
-  type: 'service' | 'material';
+  type: 'service' | 'material' | 'ppf' | 'accessory';
   discount?: number;
   discountPercentage?: number;
 }
@@ -426,7 +426,7 @@ const InvoiceItemSchema = new Schema<IInvoiceItem>({
   quantity: { type: Number, required: true, default: 1 },
   unitPrice: { type: Number, required: true },
   total: { type: Number, required: true },
-  type: { type: String, enum: ['service', 'material'], required: true },
+  type: { type: String, enum: ['service', 'material', 'ppf', 'accessory'], required: true },
   discount: { type: Number, default: 0 },
   discountPercentage: { type: Number, default: 0 }
 });
