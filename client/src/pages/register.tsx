@@ -2198,7 +2198,7 @@ export default function CustomerRegistration() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:col-span-2">
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label>City</Label>
                     <Input
@@ -2229,6 +2229,9 @@ export default function CustomerRegistration() {
                       className="border-slate-300"
                     />
                   </div>
+                </div>
+
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label>State</Label>
                     <Select
@@ -2274,21 +2277,108 @@ export default function CustomerRegistration() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-2">
+                    <Label>Referral Source</Label>
+                    <Select
+                      value={customerData.referralSource}
+                      onValueChange={(value) =>
+                        setCustomerData({
+                          ...customerData,
+                          referralSource: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger
+                        className="border-slate-300"
+                        data-testid="select-referral"
+                      >
+                        <SelectValue placeholder="How did you hear about us?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REFERRAL_SOURCES.map((source) => (
+                          <SelectItem key={source} value={source}>
+                            {source}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </div>
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-end pt-6 border-t border-slate-200">
-                <Button
-                  onClick={handleNextStep}
-                  disabled={!canProceedStep1}
-                  className="px-8 shadow-sm hover:shadow-md transition-all"
-                  data-testid="button-next-step"
-                >
-                  Vehicle Information
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
+                {isInvoiceDirect && (
+                  <div className="md:col-span-2 space-y-4 pt-4 border-t border-slate-100">
+                    <h4 className="font-semibold text-sm text-slate-900">Direct Invoice Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Labor Charge (₹)</Label>
+                        <Input
+                          type="text"
+                          value={customerData.laborCharge === 0 ? "" : customerData.laborCharge}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                            if (!isNaN(val as number)) {
+                              setCustomerData(prev => ({ ...prev, laborCharge: val as number }));
+                            }
+                          }}
+                          placeholder="0"
+                          className="border-slate-300"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Discount (₹)</Label>
+                        <Input
+                          type="text"
+                          value={customerData.discount === 0 ? "" : customerData.discount}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                            if (!isNaN(val as number)) {
+                              setCustomerData(prev => ({ ...prev, discount: val as number }));
+                            }
+                          }}
+                          placeholder="0"
+                          className="border-slate-300"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">GST (%)</Label>
+                        <Input
+                          type="text"
+                          value={customerData.taxPercentage === 0 ? "" : customerData.taxPercentage}
+                          onChange={(e) => {
+                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                            if (!isNaN(val as number)) {
+                              setCustomerData(prev => ({ ...prev, taxPercentage: val as number }));
+                            }
+                          }}
+                          placeholder="0"
+                          className="border-slate-300"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Service Notes</Label>
+                      <Input
+                        type="text"
+                        value={customerData.serviceNotes}
+                        onChange={(e) => setCustomerData(prev => ({ ...prev, serviceNotes: e.target.value }))}
+                        placeholder="Additional notes for the invoice..."
+                        className="border-slate-300"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="md:col-span-2 flex justify-end pt-6 border-t border-slate-100">
+                  <Button
+                    onClick={handleNextStep}
+                    disabled={!canProceedStep1}
+                    className="px-8 shadow-sm hover:shadow-md transition-all"
+                    data-testid="button-next-step"
+                  >
+                    Vehicle Information
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
             </CardContent>
           </Card>
         )}
@@ -2583,67 +2673,6 @@ export default function CustomerRegistration() {
                 >
                   Previous
                 </Button>
-                {isInvoiceDirect && (
-                  <div className="flex flex-col gap-4 mb-4">
-                    <div className="flex gap-4 items-end">
-                      <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-500">Labor Charge (₹)</Label>
-                        <Input
-                          type="text"
-                          value={customerData.laborCharge === 0 ? "" : customerData.laborCharge}
-                          onChange={(e) => {
-                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
-                            if (!isNaN(val as number)) {
-                              setCustomerData(prev => ({ ...prev, laborCharge: val as number }));
-                            }
-                          }}
-                          placeholder="0"
-                          className="h-9 w-24 bg-white"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-500">Discount (₹)</Label>
-                        <Input
-                          type="text"
-                          value={customerData.discount === 0 ? "" : customerData.discount}
-                          onChange={(e) => {
-                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
-                            if (!isNaN(val as number)) {
-                              setCustomerData(prev => ({ ...prev, discount: val as number }));
-                            }
-                          }}
-                          placeholder="0"
-                          className="h-9 w-24 bg-white"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-500">GST (%)</Label>
-                        <Input
-                          type="text"
-                          value={customerData.taxPercentage === 0 ? "" : customerData.taxPercentage}
-                          onChange={(e) => {
-                            const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
-                            if (!isNaN(val as number)) {
-                              setCustomerData(prev => ({ ...prev, taxPercentage: val as number }));
-                            }
-                          }}
-                          placeholder="0"
-                          className="h-9 w-20 bg-white"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-500">Service Notes</Label>
-                      <Input
-                        type="text"
-                        value={customerData.serviceNotes}
-                        onChange={(e) => setCustomerData(prev => ({ ...prev, serviceNotes: e.target.value }))}
-                        placeholder="Additional notes..."
-                        className="h-9 w-full bg-white"
-                      />
-                    </div>
-                  </div>
-                )}
                 <Button
                   onClick={handleSubmit}
                   disabled={
