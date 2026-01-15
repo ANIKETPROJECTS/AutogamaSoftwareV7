@@ -1443,7 +1443,7 @@ export default function CustomerRegistration() {
                                         {
                                           name: `PPF: ${prev.ppfCategory}`,
                                           vehicleType: "PPF",
-                                          price: 0, // Price will be handled during invoice generation or based on selected category later
+                                          price: prev.ppfQuantity, // Store quantity in price field for PPF type
                                         }
                                       ],
                                       // We don't reset ppfCategory here because it's linked to the bottom dropdown
@@ -2131,10 +2131,16 @@ export default function CustomerRegistration() {
                                     key={idx}
                                     className="flex items-center justify-between p-2 bg-white rounded border border-slate-200"
                                   >
-                                    <span className="text-sm font-medium">
-                                      {service.name} ({service.vehicleType}) - ₹
-                                      {service.price.toLocaleString("en-IN")}
-                                    </span>
+                                    {service.vehicleType === "PPF" ? (
+                                      <span className="text-sm font-medium">
+                                        {service.name} - {service.price} sq ft
+                                      </span>
+                                    ) : (
+                                      <span className="text-sm font-medium">
+                                        {service.name} ({service.vehicleType}) - ₹
+                                        {service.price.toLocaleString("en-IN")}
+                                      </span>
+                                    )}
                                     <Button
                                       variant="ghost"
                                       size="sm"
