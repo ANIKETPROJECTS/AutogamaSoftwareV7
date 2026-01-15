@@ -746,7 +746,13 @@ export default function CustomerRegistration() {
     if (!customerData.ppfCategory) return [];
     
     const items = inventory.filter(item => {
-      const isPpf = item.isPpf === true || item.isPpf === 'true' || (item.category && item.category.toLowerCase().includes('ppf'));
+      // Improved matching logic: check isPpf flag, category, or if the name matches the selected PPF category
+      const isPpf = item.isPpf === true || 
+                    item.isPpf === 'true' || 
+                    (item.category && item.category.toLowerCase().includes('ppf')) ||
+                    (item.name && item.name.toLowerCase().includes('garware')) ||
+                    (item.name && item.name.toLowerCase().includes('elite'));
+      
       const catMatch = (item.category || item.name) === customerData.ppfCategory;
       return isPpf && catMatch;
     });
