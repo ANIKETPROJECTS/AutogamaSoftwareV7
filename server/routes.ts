@@ -1724,6 +1724,46 @@ export async function registerRoutes(
     }
   });
 
+  // Ticket routes
+  app.get("/api/tickets", async (_req, res) => {
+    try {
+      const tickets = await storage.getTickets();
+      res.json(tickets);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tickets" });
+    }
+  });
+
+  app.post("/api/tickets", async (req, res) => {
+    try {
+      const ticket = await storage.createTicket(req.body);
+      res.status(201).json(ticket);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create ticket" });
+    }
+  });
+
+  app.patch("/api/tickets/:id", async (req, res) => {
+    try {
+      const ticket = await storage.updateTicket(req.params.id, req.body);
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+      res.json(ticket);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update ticket" });
+    }
+  });
+
+  app.delete("/api/tickets/:id", async (req, res) => {
+    try {
+      await storage.deleteTicket(req.params.id);
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete ticket" });
+    }
+  });
+
   app.delete("/api/price-inquiries/:id", async (req, res) => {
     try {
       const { id } = req.params;

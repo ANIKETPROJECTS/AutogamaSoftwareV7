@@ -113,3 +113,13 @@ export const inventorySchema = z.object({
   price: z.number().optional(),
   isPpf: z.boolean().default(false)
 });
+
+export const ticketSchema = z.object({
+  customerId: z.string().min(1),
+  customerName: z.string().min(1),
+  note: z.string().min(1),
+  createdAt: z.date().optional()
+});
+
+export type Ticket = z.infer<typeof ticketSchema> & { _id: string };
+export type InsertTicket = z.infer<typeof ticketSchema>;

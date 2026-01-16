@@ -36,6 +36,7 @@ const menuItems = [
   { href: '/technicians', label: 'Technicians', icon: UserCog },
   { href: '/inventory', label: 'Inventory', icon: Package },
   { href: '/appointments', label: 'Appointments', icon: Calendar },
+  { href: '/tickets', label: 'Tickets', icon: MessageCircle },
   { href: '/manage-services', label: 'Manage Services', icon: ShieldCheck },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];

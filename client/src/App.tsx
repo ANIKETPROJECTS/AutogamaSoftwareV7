@@ -19,6 +19,7 @@ import CustomerService from "@/pages/customer-service";
 import Technicians from "@/pages/technicians";
 import ManageServices from "@/pages/manage-services";
 import Inventory from "@/pages/inventory";
+import Tickets from "@/pages/tickets";
 import Appointments from "@/pages/appointments";
 import PriceInquiries from "@/pages/price-inquiries";
 import Invoices from "@/pages/invoices";
@@ -43,6 +44,7 @@ function ProtectedRoutes() {
           <Route path="/manage-services" component={ManageServices} />
           <Route path="/invoices" component={Invoices} />
           <Route path="/inventory" component={Inventory} />
+          <Route path="/tickets" component={Tickets} />
           <Route path="/roll-history/:id" component={RollHistory} />
           <Route path="/appointments" component={Appointments} />
           <Route path="/price-inquiries" component={PriceInquiries} />

@@ -1,5 +1,5 @@
-import { ICustomer, IJob, ITechnician, IInventoryItem, IAppointment, IWhatsAppTemplate, IInvoice, JobStage, IPriceInquiry, IAccessorySale } from './models';
-import { Customer, Job, Technician, Inventory, Appointment, WhatsAppTemplate, Invoice, PriceInquiry, AccessorySale } from './models';
+import { ICustomer, IJob, ITechnician, IInventoryItem, IAppointment, IWhatsAppTemplate, IInvoice, JobStage, IPriceInquiry, IAccessorySale, ITicket } from './models';
+import { Customer, Job, Technician, Inventory, Appointment, WhatsAppTemplate, Invoice, PriceInquiry, AccessorySale, Ticket } from './models';
 import mongoose from 'mongoose';
 
 export interface IStorage {
@@ -77,6 +77,11 @@ export interface IStorage {
   addMaterialsToJob(jobId: string, materials: { inventoryId: string; quantity: number }[]): Promise<IJob | null>;
   markInvoicePaid(invoiceId: string, paymentMode?: string, otherPaymentDetails?: string): Promise<IInvoice | null>;
   deleteInvoice(id: string): Promise<void>;
+
+  getTickets(): Promise<ITicket[]>;
+  createTicket(data: Partial<ITicket>): Promise<ITicket>;
+  updateTicket(id: string, data: Partial<ITicket>): Promise<ITicket | null>;
+  deleteTicket(id: string): Promise<void>;
 }
 
 export class MongoStorage implements IStorage {
@@ -700,6 +705,25 @@ export class MongoStorage implements IStorage {
   async deleteInvoice(id: string): Promise<void> {
     if (!mongoose.Types.ObjectId.isValid(id)) return;
     await Invoice.findByIdAndDelete(id);
+  }
+
+  async getTickets(): Promise<ITicket[]> {
+    return Ticket.find().sort({ createdAt: -1 });
+  }
+
+  async createTicket(data: Partial<ITicket>): Promise<ITicket> {
+    const ticket = new Ticket(data);
+    return ticket.save();
+  }
+
+  async updateTicket(id: string, data: Partial<ITicket>): Promise<ITicket | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return null;
+    return Ticket.findByIdAndUpdate(id, data, { new: true });
+  }
+
+  async deleteTicket(id: string): Promise<void> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return;
+    await Ticket.findByIdAndDelete(id);
   }
 }
 

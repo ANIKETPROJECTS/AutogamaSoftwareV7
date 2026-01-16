@@ -465,6 +465,20 @@ export interface IAdmin extends Document {
   createdAt: Date;
 }
 
+export interface ITicket extends Document {
+  customerId: mongoose.Types.ObjectId;
+  customerName: string;
+  note: string;
+  createdAt: Date;
+}
+
+const TicketSchema = new Schema<ITicket>({
+  customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
+  customerName: { type: String, required: true },
+  note: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const AdminSchema = new Schema<IAdmin>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -493,6 +507,7 @@ export const WhatsAppTemplate = mongoose.model<IWhatsAppTemplate>('WhatsAppTempl
 export const PriceInquiry = mongoose.model<IPriceInquiry>('PriceInquiry', PriceInquirySchema);
 export const Invoice = mongoose.model<IInvoice>('Invoice', InvoiceSchema);
 export const Admin = mongoose.model<IAdmin>('Admin', AdminSchema);
+export const Ticket = mongoose.model<ITicket>('Ticket', TicketSchema);
 
 export const Service = mongoose.model('Service', new mongoose.Schema({
   name: { type: String, required: true, unique: true },
