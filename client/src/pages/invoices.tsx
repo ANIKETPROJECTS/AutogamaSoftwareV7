@@ -626,10 +626,6 @@ export default function Invoices() {
     <div className="space-y-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Invoices & Tracking</h1>
-        <Button onClick={() => setManualInvoiceOpen(true)} className="bg-primary text-white">
-          <FileText className="w-4 h-4 mr-2" />
-          Generate Manual Invoice
-        </Button>
       </div>
 
       <Dialog open={manualInvoiceOpen} onOpenChange={setManualInvoiceOpen}>
