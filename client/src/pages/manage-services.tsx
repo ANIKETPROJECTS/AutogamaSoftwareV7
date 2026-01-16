@@ -617,11 +617,25 @@ export default function ManageServices() {
                     <div key={type} className="space-y-3 p-4 border rounded-lg bg-muted/30">
                       <div className="flex justify-between items-center">
                         <Label className="text-sm font-bold uppercase tracking-wider">{type}</Label>
-                        {formData.isWarrantyBased && (
-                          <div className="text-xs text-muted-foreground italic">
-                            {formData.warrantyOptions[type]?.length || 0} options
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {formData.isWarrantyBased && (
+                            <div className="text-xs text-muted-foreground italic">
+                              {formData.warrantyOptions[type]?.length || 0} options
+                            </div>
+                          )}
+                          {!["Small Cars", "Hatchback / Small Sedan", "Mid-size Sedan / Compact SUV / MUV", "SUV / MPV"].includes(type) && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              type="button"
+                              className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleRemoveVehicleType(type)}
+                              title={`Delete ${type}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       
                       {!formData.isWarrantyBased ? (
