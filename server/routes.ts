@@ -2,7 +2,7 @@ import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { sendStageUpdateMessage } from "./whatsapp";
-import { Customer, Admin, Invoice, PpfCategory, Service, Ticket } from "./models";
+import { Customer, Admin, Invoice, PpfCategory, Service, Ticket, Settings } from "./models";
 import type { JobStage, CustomerStatus } from "./models";
 import mongoose from "mongoose";
 import path from "path";
@@ -529,6 +529,30 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Delete service error:", error);
       res.status(500).json({ message: "Failed to delete service" });
+    }
+  });
+
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const settings = await Settings.findOne() || { customVehicleTypes: [] };
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  app.patch("/api/settings", async (req, res) => {
+    try {
+      let settings = await Settings.findOne();
+      if (!settings) {
+        settings = new Settings(req.body);
+      } else {
+        Object.assign(settings, req.body);
+      }
+      await settings.save();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update settings" });
     }
   });
 

@@ -518,3 +518,9 @@ export const Service = mongoose.model('Service', new mongoose.Schema({
   warrantyOptions: { type: Map, of: [Schema.Types.Mixed], default: {} },
   createdAt: { type: Date, default: Date.now }
 }));
+
+const settingsSchema = new mongoose.Schema({
+  customVehicleTypes: { type: [String], default: [] }
+});
+
+export const Settings = mongoose.models.Settings || mongoose.model('Settings', settingsSchema);

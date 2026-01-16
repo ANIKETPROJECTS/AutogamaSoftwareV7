@@ -102,6 +102,51 @@ export default function ManageServices() {
     queryKey: ["/api/services"],
   });
 
+  const { data: settings, isLoading: settingsLoading } = useQuery<any>({
+    queryKey: ["/api/settings"],
+  });
+
+  const vehicleTypes = useMemo(() => {
+    const baseTypes = ["Small Cars", "Hatchback / Small Sedan", "Mid-size Sedan / Compact SUV / MUV", "SUV / MPV"];
+    if (settings?.customVehicleTypes && Array.isArray(settings.customVehicleTypes)) {
+      return [...baseTypes, ...settings.customVehicleTypes];
+    }
+    return baseTypes;
+  }, [settings]);
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: (newSettings: any) => 
+      apiRequest("PATCH", "/api/settings", newSettings),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+      toast({ title: "Settings updated successfully" });
+    },
+  });
+
+  const [newVehicleType, setNewVehicleType] = useState("");
+  const [showAddVehicleType, setShowAddVehicleType] = useState(false);
+
+  const handleAddVehicleType = () => {
+    if (!newVehicleType.trim()) return;
+    const currentCustom = settings?.customVehicleTypes || [];
+    if (currentCustom.includes(newVehicleType.trim()) || ["Small Cars", "Hatchback / Small Sedan", "Mid-size Sedan / Compact SUV / MUV", "SUV / MPV"].includes(newVehicleType.trim())) {
+      toast({ title: "Vehicle type already exists", variant: "destructive" });
+      return;
+    }
+    updateSettingsMutation.mutate({
+      customVehicleTypes: [...currentCustom, newVehicleType.trim()]
+    });
+    setNewVehicleType("");
+    setShowAddVehicleType(false);
+  };
+
+  const handleRemoveVehicleType = (type: string) => {
+    const currentCustom = settings?.customVehicleTypes || [];
+    updateSettingsMutation.mutate({
+      customVehicleTypes: currentCustom.filter((t: string) => t !== type)
+    });
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState("name-asc");
@@ -441,7 +486,6 @@ export default function ManageServices() {
     }
   };
 
-  const vehicleTypes = ["Small Cars", "Hatchback / Small Sedan", "Mid-size Sedan / Compact SUV / MUV", "SUV / MPV"];
 
   return (
     <div className="p-6 space-y-6">
@@ -451,6 +495,10 @@ export default function ManageServices() {
           <p className="text-muted-foreground">Configure services and pricing across vehicle types</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowAddVehicleType(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Manage Vehicle Types
+          </Button>
           <Button variant="outline" onClick={handleExport}>
             <Download className="mr-2 h-4 w-4" />
             Export Services
@@ -474,6 +522,43 @@ export default function ManageServices() {
           </Button>
         </div>
       </div>
+
+      {showAddVehicleType && (
+        <Card className="hover-elevate">
+          <CardHeader>
+            <CardTitle>Manage Vehicle Types</CardTitle>
+            <CardDescription>Add or remove custom vehicle types</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input 
+                placeholder="New Vehicle Type Name" 
+                value={newVehicleType}
+                onChange={(e) => setNewVehicleType(e.target.value)}
+              />
+              <Button onClick={handleAddVehicleType}>Add</Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {settings?.customVehicleTypes?.map((type: string) => (
+                <div key={type} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md">
+                  <span>{type}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-4 w-4 text-destructive"
+                    onClick={() => handleRemoveVehicleType(type)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="ghost" onClick={() => setShowAddVehicleType(false)}>Close</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {isAdding && (
         <Card className="hover-elevate">
