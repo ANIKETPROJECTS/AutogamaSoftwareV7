@@ -58,16 +58,15 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Tickets() {
-  const { setTitle, setSubtitle } = usePageContext();
+  const { setPageTitle } = usePageContext();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    setTitle("Tickets");
-    setSubtitle("Manage notes and reminders linked to customers");
-  }, [setTitle, setSubtitle]);
+    setPageTitle("Tickets", "Manage notes and reminders linked to customers");
+  }, [setPageTitle]);
 
   const { data: tickets, isLoading: ticketsLoading } = useQuery<Ticket[]>({
     queryKey: ["/api/tickets"],
