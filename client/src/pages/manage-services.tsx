@@ -1,3 +1,4 @@
+import { apiRequest } from "@/lib/queryClient";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -495,10 +496,6 @@ export default function ManageServices() {
           <p className="text-muted-foreground">Configure services and pricing across vehicle types</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowAddVehicleType(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Manage Vehicle Types
-          </Button>
           <Button variant="outline" onClick={handleExport}>
             <Download className="mr-2 h-4 w-4" />
             Export Services
@@ -522,43 +519,6 @@ export default function ManageServices() {
           </Button>
         </div>
       </div>
-
-      {showAddVehicleType && (
-        <Card className="hover-elevate">
-          <CardHeader>
-            <CardTitle>Manage Vehicle Types</CardTitle>
-            <CardDescription>Add or remove custom vehicle types</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input 
-                placeholder="New Vehicle Type Name" 
-                value={newVehicleType}
-                onChange={(e) => setNewVehicleType(e.target.value)}
-              />
-              <Button onClick={handleAddVehicleType}>Add</Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {settings?.customVehicleTypes?.map((type: string) => (
-                <div key={type} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md">
-                  <span>{type}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-4 w-4 text-destructive"
-                    onClick={() => handleRemoveVehicleType(type)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end">
-              <Button variant="ghost" onClick={() => setShowAddVehicleType(false)}>Close</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {isAdding && (
         <Card className="hover-elevate">
@@ -611,7 +571,47 @@ export default function ManageServices() {
               </div>
 
               <div className="space-y-4 border-t pt-4">
-                <Label className="text-lg font-semibold">Pricing by Vehicle Type</Label>
+                <div className="flex justify-between items-center">
+                  <Label className="text-lg font-semibold">Pricing by Vehicle Type</Label>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowAddVehicleType(!showAddVehicleType)}
+                  >
+                    {showAddVehicleType ? "Hide" : "Manage Vehicle Types"}
+                  </Button>
+                </div>
+
+                {showAddVehicleType && (
+                  <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+                    <Label className="text-sm font-bold">Manage Vehicle Types</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="New Vehicle Type Name" 
+                        value={newVehicleType}
+                        onChange={(e) => setNewVehicleType(e.target.value)}
+                      />
+                      <Button type="button" onClick={handleAddVehicleType}>Add</Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {settings?.customVehicleTypes?.map((type: string) => (
+                        <div key={type} className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md">
+                          <span>{type}</span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            type="button"
+                            className="h-4 w-4 text-destructive"
+                            onClick={() => handleRemoveVehicleType(type)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 gap-6">
                   {vehicleTypes.map((type) => (
                     <div key={type} className="space-y-3 p-4 border rounded-lg bg-muted/30">
