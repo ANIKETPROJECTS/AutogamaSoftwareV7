@@ -775,7 +775,8 @@ export default function CustomerRegistration() {
         _id: service._id,
         name: service.name,
         isPpf: true,
-        warrantyOptions: service.warrantyOptions || {}
+        warrantyOptions: service.warrantyOptions || {},
+        prices: service.prices || {}
       }));
   }, [dbServices]);
 
@@ -1706,7 +1707,28 @@ export default function CustomerRegistration() {
                                 {(() => {
                                   const selectedCat = ppfCategoriesFromServices.find(c => c.name === customerData.ppfCategory);
                                   const options = selectedCat?.warrantyOptions || {};
-                                  return Object.keys(options).map((type) => (
+                                  const keys = Object.keys(options);
+                                  
+                                  if (keys.length > 0) {
+                                    return keys.map((type) => (
+                                      <SelectItem key={type} value={type}>
+                                        {type}
+                                      </SelectItem>
+                                    ));
+                                  }
+
+                                  // Fallback to prices if no warranty options
+                                  const priceKeys = Object.keys(selectedCat?.prices || {});
+                                  if (priceKeys.length > 0) {
+                                    return priceKeys.map((type) => (
+                                      <SelectItem key={type} value={type}>
+                                        {type}
+                                      </SelectItem>
+                                    ));
+                                  }
+
+                                  // Final fallback to default vehicle types
+                                  return VEHICLE_TYPES.map((type) => (
                                     <SelectItem key={type} value={type}>
                                       {type}
                                     </SelectItem>

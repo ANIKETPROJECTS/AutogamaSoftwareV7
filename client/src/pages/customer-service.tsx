@@ -127,7 +127,8 @@ export default function CustomerService() {
         _id: s._id || s.id || Math.random().toString(),
         name: s.name,
         isPpf: true,
-        warrantyOptions: s.warrantyOptions || {}
+        warrantyOptions: s.warrantyOptions || {},
+        prices: s.prices || {}
       }));
     return Array.from(new Map(servicesFromDb.map(s => [s.name, s])).values());
   }, [dbServices]);
@@ -136,17 +137,25 @@ export default function CustomerService() {
     if (isLoadingLastService) return;
     if (!ppfCategory || !ppfVehicleType) return;
 
-    // Check if we have data for this category in services
     const selectedService = ppfCategoriesFromServices.find(s => s.name === ppfCategory);
-    if (selectedService && selectedService.warrantyOptions) {
-      const vehicleTypeOptions = selectedService.warrantyOptions[ppfVehicleType];
-      if (Array.isArray(vehicleTypeOptions) && ppfWarranty) {
-        const option = vehicleTypeOptions.find((o: any) => o.warranty === ppfWarranty);
-        if (option) {
-          const calculatedPrice = option.price;
-          setPpfPrice(prev => (prev === 0 || prev !== calculatedPrice ? calculatedPrice : prev));
-          return;
+    if (selectedService) {
+      if (selectedService.warrantyOptions) {
+        const vehicleTypeOptions = selectedService.warrantyOptions[ppfVehicleType];
+        if (Array.isArray(vehicleTypeOptions) && ppfWarranty) {
+          const option = vehicleTypeOptions.find((o: any) => o.warranty === ppfWarranty);
+          if (option) {
+            const calculatedPrice = option.price;
+            setPpfPrice(prev => (prev === 0 || prev !== calculatedPrice ? calculatedPrice : prev));
+            return;
+          }
         }
+      }
+      
+      // Fallback to single price if no warranty or option not found
+      if (selectedService.prices && selectedService.prices[ppfVehicleType]) {
+        const calculatedPrice = selectedService.prices[ppfVehicleType];
+        setPpfPrice(prev => (prev === 0 || prev !== calculatedPrice ? calculatedPrice : prev));
+        return;
       }
     }
 
@@ -950,9 +959,25 @@ export default function CustomerService() {
                                   onKeyDown={(e) => e.stopPropagation()}
                                 />
                               </div>
-                              {VEHICLE_TYPES.map((type) => (
-                                <SelectItem key={type} value={type}>{type}</SelectItem>
-                              ))}
+                              {(() => {
+                                const selectedCat = ppfCategoriesFromServices.find(s => s.name === ppfCategory);
+                                const options = selectedCat?.warrantyOptions || {};
+                                const keys = Object.keys(options);
+                                if (keys.length > 0) {
+                                  return keys.map((type) => (
+                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                  ));
+                                }
+                                const priceKeys = Object.keys(selectedCat?.prices || {});
+                                if (priceKeys.length > 0) {
+                                  return priceKeys.map((type) => (
+                                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                                  ));
+                                }
+                                return VEHICLE_TYPES.map((type) => (
+                                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                                ));
+                              })()}
                             </SelectContent>
                           </Select>
                         </div>
