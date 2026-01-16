@@ -529,6 +529,24 @@ Auto Gamma Car Care Studio`;
     );
   }, [ALL_SERVICE_OPTIONS, serviceSearchQuery]);
 
+  const availableVehicleTypes = useMemo(() => {
+    if (!tempServiceName) return CAR_TYPES;
+    
+    const dbService = dbServices.find((s: any) => s.name === tempServiceName);
+    if (dbService && dbService.prices) {
+      const types = Object.keys(dbService.prices);
+      if (types.length > 0) return types;
+    }
+    
+    // Check OTHER_SERVICES as fallback
+    const staticService = OTHER_SERVICES[tempServiceName as keyof typeof OTHER_SERVICES];
+    if (staticService) {
+      return Object.keys(staticService);
+    }
+
+    return CAR_TYPES;
+  }, [tempServiceName, dbServices]);
+
   const addServiceItem = () => {
     if (!tempServiceName || !tempCarType) return;
     
@@ -770,7 +788,7 @@ Auto Gamma Car Care Studio`;
                       <SelectValue placeholder="Select Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CAR_TYPES.map(t => (
+                      {availableVehicleTypes.map(t => (
                         <SelectItem key={t} value={t}>
                           {t}
                           {tempServiceName && !tempWarrantyOptions.length && (

@@ -449,6 +449,18 @@ export default function CustomerService() {
     return servicesMap;
   }, [dbServices]);
 
+  const availableOtherServiceVehicleTypes = useMemo(() => {
+    if (!otherServiceName) return VEHICLE_TYPES;
+    const dbSvc = dbServices.find((s: any) => s.name === otherServiceName);
+    if (dbSvc && dbSvc.prices) {
+      const types = Object.keys(dbSvc.prices);
+      if (types.length > 0) return types;
+    }
+    const staticSvc = OTHER_SERVICES[otherServiceName as keyof typeof OTHER_SERVICES];
+    if (staticSvc) return Object.keys(staticSvc);
+    return VEHICLE_TYPES;
+  }, [otherServiceName, dbServices]);
+
   const handleAddOtherService = () => {
     if (!otherServiceName || !otherServiceVehicleType) {
       toast({ title: 'Please select a service and vehicle type', variant: 'destructive' });
@@ -1037,7 +1049,7 @@ export default function CustomerService() {
                           <SelectValue placeholder="Select vehicle type" />
                         </SelectTrigger>
                         <SelectContent className="max-h-64 overflow-y-auto">
-                          {VEHICLE_TYPES.map((type) => {
+                          {availableOtherServiceVehicleTypes.map((type) => {
                             const serviceData = otherServiceName ? allOtherServices[otherServiceName] : null;
                             const price = serviceData ? (serviceData as any)[type] : null;
                             return (

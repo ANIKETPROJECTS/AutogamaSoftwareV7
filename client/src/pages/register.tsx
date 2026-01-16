@@ -442,6 +442,23 @@ export default function CustomerRegistration() {
     serviceNotes: "",
   });
 
+  const { data: dbServices = [], refetch: refetchServices } = useQuery<any[]>({
+    queryKey: ["/api/services"],
+    staleTime: 0, // Ensure we get fresh data
+  });
+
+  const availableServiceVehicleTypes = useMemo(() => {
+    if (!customerData.tempServiceName) return VEHICLE_TYPES;
+    const dbSvc = dbServices.find((s: any) => s.name === customerData.tempServiceName);
+    if (dbSvc && dbSvc.prices) {
+      const types = Object.keys(dbSvc.prices);
+      if (types.length > 0) return types;
+    }
+    const staticSvc = OTHER_SERVICES[customerData.tempServiceName as keyof typeof OTHER_SERVICES];
+    if (staticSvc) return Object.keys(staticSvc);
+    return VEHICLE_TYPES;
+  }, [customerData.tempServiceName, dbServices]);
+
   const setManualRollId = (val: string) => {
     setCustomerData(prev => ({ ...prev, rollId: val }));
   };
@@ -531,11 +548,6 @@ export default function CustomerRegistration() {
   }, [existingCustomers]);
 
   const [vehicleImagePreview, setVehicleImagePreview] = useState<string>("");
-
-  const { data: dbServices = [], refetch: refetchServices } = useQuery<any[]>({
-    queryKey: ["/api/services"],
-    staleTime: 0, // Ensure we get fresh data
-  });
 
   const { data: dbPpfCategories = [] } = useQuery<any[]>({
     queryKey: ["/api/ppf-categories"],
@@ -2193,16 +2205,20 @@ export default function CustomerRegistration() {
                                     onKeyDown={(e) => e.stopPropagation()}
                                   />
                                 </div>
-                                {Object.entries(
-                                  allOtherServices[
+                                {availableServiceVehicleTypes.map((type) => {
+                                  const serviceData = allOtherServices[
                                     customerData.tempServiceName
-                                  ] || {},
-                                ).map(([type, price]) => (
-                                  <SelectItem key={type} value={type}>
-                                    {type} - ₹
-                                    {(price as number).toLocaleString("en-IN")}
-                                  </SelectItem>
-                                ))}
+                                  ] as Record<string, number>;
+                                  const price = serviceData ? serviceData[type] : null;
+                                  return (
+                                    <SelectItem key={type} value={type}>
+                                      {type}
+                                      {price !== undefined && price !== null
+                                        ? ` - ₹${price.toLocaleString("en-IN")}`
+                                        : ""}
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
                             <Button
