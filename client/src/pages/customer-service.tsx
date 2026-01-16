@@ -1098,7 +1098,6 @@ export default function CustomerService() {
                         </div>
                         <div className="border rounded-lg divide-y">
                           {selectedOtherServices
-                            .filter(s => s.name !== 'TEST' && s.name !== 'test')
                             .map((service, index) => {
                               // Find the actual index in the original array
                               const originalIndex = selectedOtherServices.findIndex(origS => origS === service);
@@ -1142,32 +1141,6 @@ export default function CustomerService() {
               </div>
 
               <div className="space-y-6">
-                {/* Legacy/Specific Accessory Check (TEST) */}
-                {selectedOtherServices.some(s => s.name.toLowerCase() === 'test') && (
-                  <Card className="border border-blue-200 bg-blue-50/30">
-                    <CardHeader className="py-2">
-                      <CardTitle className="text-sm font-semibold text-blue-800">Legacy Accessories</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pb-3">
-                      {selectedOtherServices
-                        .filter(s => s.name.toLowerCase() === 'test')
-                        .map((service, index) => {
-                          const originalIndex = selectedOtherServices.findIndex(origS => origS === service);
-                          return (
-                            <div key={originalIndex} className="flex justify-between items-center py-1">
-                              <span className="text-sm font-medium">{service.name}</span>
-                              <div className="flex items-center gap-4">
-                                <span className="text-sm font-bold">₹{(service.price || 0).toLocaleString('en-IN')}</span>
-                                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveOtherService(originalIndex)}>
-                                  <X className="w-3 h-3 text-red-500" />
-                                </Button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </CardContent>
-                  </Card>
-                )}
                 <div className="space-y-2">
                   <Label>Service Notes</Label>
                   <Textarea value={serviceNotes} onChange={(e) => setServiceNotes(e.target.value)} placeholder="Additional notes..." rows={3} />
